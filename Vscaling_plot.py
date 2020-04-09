@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 import argparse
-default_pts = ["20_2j25","40","60","80"]
+default_pts = ["20_2j30","40","60","80"]
+default_add_syst = 0.002
 parser = argparse.ArgumentParser()
 parser.add_argument("--minjet", type=int, default=4)
 parser.add_argument("--maxjet", type=int, default=15)
+parser.add_argument("--add-syst", type=float, default=default_add_syst)
 parser.add_argument("--sample-group", help="Sample group to plot") 
 parser.add_argument("--pt", action="append", help="pT thresholds to plot") 
 parser.add_argument("--onlyMC16a", action="store_true")
 parser.add_argument("--ploterrorband", action="store_true")
+parser.add_argument("--print-syst", action="store_true")
 opts = parser.parse_args()
 if not opts.pt: opts.pt = default_pts
 
@@ -40,6 +43,7 @@ forinternal = False
 samples = {
     "gammajets"          :("Data #gamma+jets",20,3, 0, None),
     "multibosonsMC"      :("MC VV+jets",21,1, 0, None),
+    "wjets_madgraph"     :("MC W+jets (Madgraph)",26,2, 0, None),
     "wjetsMC"            :("MC W+jets",26,2, 0, None),
     "zjetsMC"            :("MC Z+jets",32,3, 0, None),
     "Wt1LMC"             :("MC Wt",32,3, 0, None),
@@ -48,23 +52,26 @@ samples = {
     "WtMCcommon"         :("MC Wt common fit",32,3, 0, ("Wt1LMC",)),
     "ttbarMCcommon"      :("MC ttbar common fit",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
     "ttbarMC"            :("MC ttbar",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
+    "ttbar_amcatnlo"     :("MC ttbar (ME)",32,3, 0, None),
+    "ttbar_herwig"       :("MC ttbar (PS)",32,3, 0, None),
     "ttbar1LMC"          :("MC ttbar (1L)",32,3, 0, None),
     "ttbar2LMC"          :("MC ttbar (2L)",26,3, 2, None),
     "ttbar2LemubMC"      :("MC ttbar (2L) emu+bjet",32,3, 2, None),
     "ttbar2LemuMC"       :("MC ttbar (2L) emu",32,3, 2, None),
     "emubjetData"        :("Data emu+bjet",20,3, 2, None),
     #"emubjetData"        :("Data emu+bjet",20,3, 2, ("emubjetData","-WtemubMC")),
-    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",32,3, 0, ("ttWMC","tt2LSSMC")),
+    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",32,3, 0, ("ttWMC","ttbar2LSSMC")),
     "ttWMC"              :("MC ttW",32,3, 0, None),
-    "tt2LSSMC"           :("MC t#bar{t} fakes",32,3, 0, None),
+    "ttbar2LSSMC"           :("MC t#bar{t} fakes",32,3, 0, None),
     "dummy"              :("Dummy",32,3, 0, None),
     }
 
 groups = {
-    "Vjets" : ("multibosonsMC","wjetsMC","zjetsMC","gammajets"),
+    "Vjets" : ("wjetsMC","zjetsMC","wjets_madgraph","gammajets"),
     "ttbar" : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubjetData"),
     "ttbar1L" : ("ttbar1LMC","ttbarMC","WtttbarMC","dummy"),
-    "SS3L"  : ("multibosonsMC","ttWMC","tt2LSSMC","ttWplusttbar2LSSMC"),
+    "ttbarsyst" : ("ttbarMC","ttbar_amcatnlo","ttbar_herwig","dummy"),
+    "SS3L"  : ("multibosonsMC","ttWMC","ttbar2LSSMC","ttWplusttbar2LSSMC"),
     #"Wt"    : ("ttWt1LMC","Wt1LMC","ttbar1LMCcommon","Wt1LMCcommon"),
     "Wt"    : ("Wt1LMC","ttbarMC","WtttbarMC","dummy")
     }
@@ -76,6 +83,8 @@ if opts.pt != default_pts:
     tag += "_".join(opts.pt)
 if opts.ploterrorband:
     tag += "_errorband"
+if opts.add_syst!=default_add_syst:
+    tag += "%f"%opts.add_syst
 
 offset = opts.maxjet-opts.minjet+1
 holder = []
@@ -122,12 +131,16 @@ def getSampleHisto(samplename,pt,opts):
 
 def main(m):
     firstsample = True
+    maxsyst = {}
+    maxstatsyst = {}
     for isample,samplename in enumerate(group):
 
         legendname, imarker, ratiospace, sampleoffset, subsamples = samples[samplename]
         firstpt = True
         usedsample = False
         for ipt, pt in enumerate(opts.pt):
+            if not pt in maxsyst: maxsyst[pt] = {}
+            if not pt in maxstatsyst: maxstatsyst[pt] = {}
             if len(pt)<=2: pt3lep = pt+"_3lep"
             else: pt3lep = pt[:3]+"3lep"+pt[3:]
             same = "" if firstpt else "same"
@@ -140,16 +153,17 @@ def main(m):
                 continue
             else: print "Will process",samplename,pt
             #h.SetDirectory(0)
-            if "wjets" in samplename and "zjets" in group: h = extendVjets(h, getSampleHisto(samplename.replace("wjets","zjets"),pt,opts))
-            if "zjets" in samplename and "wjets" in group: h = extendVjets(h, getSampleHisto(samplename.replace("zjets","wjets"),pt,opts))
-            if "ttbarMCcommon" in samplename:            h = extendVjets(h, getSampleHisto(samplename.replace("ttbar","Wt"),pt,opts))
-            if "WtMCcommon" in samplename:               h = extendVjets(h, getSampleHisto(samplename.replace("Wt","ttbar"),pt,opts))
+            if "wjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("wjets","zjets"),pt,opts))
+            if "zjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("zjets","wjets"),pt,opts))
+            if "ttbarMCcommon" in samplename: h = extendVjets(h, getSampleHisto(samplename.replace("ttbar","Wt"),pt,opts))
+            if "WtMCcommon" in samplename:    h = extendVjets(h, getSampleHisto(samplename.replace("Wt","ttbar"),pt,opts))
             holder.append(h)
             for b in range(h.GetNbinsX()):
                 if h.GetBinContent(b+1) < 0.01: 
                     h.SetBinContent(b+1,0)
                     h.SetBinError(b+1,0)
-                h.SetBinError(b+1,max(h.GetBinError(b+1), 0.001*h.GetBinContent(b+1)))
+                if opts.add_syst:
+                    h.SetBinError(b+1,max(h.GetBinError(b+1), opts.add_syst*h.GetBinContent(b+1)))
                 #h.SetBinError(b+1,max(h.GetBinError(b+1), sqrt(h.GetBinContent(b+1))))
             h.SetMarkerStyle(imarker)
             h.SetLineColor(ipt+coloroffset+1*(ipt>=3))
@@ -161,7 +175,8 @@ def main(m):
             m.fitfcn.SetParLimits(2,0,3)
             if "tt" in samplename or "Wt" in samplename or "emu" in samplename:
                 m.fitfcn.ReleaseParameter(3)
-                m.fitfcn.SetParLimits(3,-3.9,3.2)
+                m.fitfcn.SetParLimits(3,-3.5,3.2)
+                m.fitfcn.SetParLimits(2,0,2.0)
                 if not "common" in samplename:
                     m.fitfcn.FixParameter(4,0)
                 else:
@@ -169,6 +184,8 @@ def main(m):
                 if "ttW" in samplename:
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.11, 0.8, -2.9, h.GetBinContent(h.GetMaximumBin()))
                     m.fitfcn.FixParameter(3,1)
+                elif "ttbar_herwig" in samplename:
+                    m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.12, -2.8, h.GetBinContent(h.GetMaximumBin()))
                 else:
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.6, -1.1, h.GetBinContent(h.GetMaximumBin()))
             else:
@@ -178,7 +195,7 @@ def main(m):
                     m.fitfcn.ReleaseParameter(4)
                 else:
                     m.fitfcn.FixParameter(4,0)
-            h.Fit("fitfcn")
+            fitres = h.Fit("fitfcn",'S')
             fitband = h.Clone()
             ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(fitband,0.68) #Set CL
             fitband.SetFillColorAlpha(ipt+coloroffset+1*(ipt>=3),0.5)
@@ -199,10 +216,11 @@ def main(m):
             if isample==2: m.bottompad2.cd()
             if isample==1: m.bottompad3.cd()
             if isample==0: m.bottompad4.cd()
+
     
             ratio = h.Clone()
             ratio.Divide(f)
-            ratio.GetYaxis().SetRangeUser(0.1,1.9)
+            ratio.GetYaxis().SetRangeUser(0.4,1.6)
             ratio.GetXaxis().SetTitleOffset(5)
             shortname = legendname.replace("Data ","").replace("MC ","")
             ratio.GetYaxis().SetTitle(shortname+" / Fit"+" "*ratiospace)
@@ -211,17 +229,34 @@ def main(m):
             ratio.GetYaxis().SetNdivisions(505)
             ratio.SetMarkerColor(ipt+coloroffset+1*(ipt>=3))
             ratio.DrawCopy("hist,E,P"+same)
+            if fitres.Status()!=0:
+                m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             ratioband = fitband.Clone()
             ratioband.Divide(f)
             if opts.ploterrorband:
                 ratioband.DrawCopy("e5 same")
             if forinternal:
-                fittext.DrawLatex(0.22+ipt*0.1,0.7*(1+0.10*(isample==3)),"#color[%d]{r=%.2f}"%(ipt+coloroffset+1*(ipt>=3),math.exp(f.GetParameter(1))))
+                m.fittext.DrawLatex(0.22+ipt*0.1,0.7*(1+0.10*(isample==3)),"#color[%d]{r=%.2f}"%(ipt+coloroffset+1*(ipt>=3),math.exp(f.GetParameter(1))))
             if firstpt:
-                line = ROOT.TLine(ratio.GetBinLowEdge(1),1,ratio.GetBinLowEdge(ratio.GetNbinsX()-1),1)
+                line = ROOT.TLine(ratio.GetBinLowEdge(1),1,ratio.GetBinLowEdge(ratio.GetNbinsX()+1),1)
                 line.SetLineColor(ROOT.kGray)
                 line.Draw("same")
                 m.lines.append(line)
+            if opts.print_syst:
+                print "Syst",samplename, pt
+                for b in range(1,ratio.GetNbinsX()+1):
+                    njet = b+3 #assume all start from 4 jet, include offset for dilepton
+                    syst = abs(1-ratio.GetBinContent(b))
+                    print "%d : %.3f" %(njet,syst)
+                    maxsyst[pt][njet] = max(maxsyst[pt].get(njet,0), syst)
+                print "Syst+stat",samplename, pt
+                for b in range(1,ratio.GetNbinsX()+1):
+                    njet = b+3 #assume all start from 4 jet, include offset for dilepton
+                    syst = abs(1-ratio.GetBinContent(b))
+                    try: stat =  ratio.GetBinError(b)/ratio.GetBinContent(b)
+                    except: stat = 1
+                    print "%d : %.3f" %(njet,max(stat,syst))
+                    maxstatsyst[pt][njet] = max(maxstatsyst[pt].get(njet,0), max(stat,syst))
             #-------------------------------------
             if isample==3: m.pubpad1.cd()
             if isample==2: m.pubpad2.cd()
@@ -241,7 +276,7 @@ def main(m):
                 consecutiveratio.SetBinError(b,sqrt(pow(error1/yield1,2)+pow(error2/yield2,2))*yield2/yield1)
             yaxis = consecutiveratio.GetYaxis()
             xaxis = consecutiveratio.GetXaxis()
-            if "ttbar2LMC" in samplename or "emu" in samplename:
+            if "tt" in samplename or "emu" in samplename:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,1.29)
             else:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,0.49)
@@ -268,6 +303,8 @@ def main(m):
             errorgraph.SetFillColorAlpha(ipt+coloroffset+1*(ipt>=3),0.5)
             if opts.ploterrorband:
                 errorgraph.Draw("same4")
+            if fitres.Status()!=0:
+                m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             if firstsample:
                 m.legendpt.AddEntry(h,"jet p_{T} > %s GeV" % pt,"l")
                 print "AddEntry",pt
@@ -285,6 +322,15 @@ def main(m):
     m.toppad.SetLogy(1)
     m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.pdf"%tag)
     m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.png"%tag)
+    if opts.print_syst:
+        for pt, syst in maxsyst.iteritems():
+            print "Max syst",pt
+            for njet, jsyst in syst.iteritems():
+                print njet, round(jsyst,3)
+        for pt, statsyst in maxstatsyst.iteritems():
+            print "Max stat+syst",pt
+            for njet, jstatsyst in statsyst.iteritems():
+                print njet, round(jstatsyst,3)
 
 
 class M(object):

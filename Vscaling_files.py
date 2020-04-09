@@ -23,10 +23,11 @@ opts = parser.parse_args()
 isData = "data" in opts.sample
 hists = {}
 cuts = { 
-#    (40,None): None,
-#    (60,None): None,
-#    (80,None): None,
-    (20,'2j25'):  'jet_pt[1]>25e3', 
+    (40,None): None,
+    (60,None): None,
+    (80,None): None,
+    (20,'2j30'):  'jet_pt[1]>30e3', 
+#    (20,'2j25'):  'jet_pt[1]>25e3', 
 }
 
 
