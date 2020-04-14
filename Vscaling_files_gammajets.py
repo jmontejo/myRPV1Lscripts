@@ -93,7 +93,7 @@ for (pt,addcutname), addcut in cuts.iteritems():
         del hbkgforplot, hbkgcut, hdatacut
 
     jetns[pt] = hjetn.Clone()
-outfile = os.getenv('SWUP_OUTPUTDIR')+"/../plots/mine/Vscaling_files.root"
+outfile = "figures/Vjets_validation/Vscaling_files.root"
 routfile = ROOT.TFile.Open(outfile,"update")
 for j in jetns.itervalues():
     j.Write()

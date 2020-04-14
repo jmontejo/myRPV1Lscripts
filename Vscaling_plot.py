@@ -7,6 +7,7 @@ parser.add_argument("--minjet", type=int, default=4)
 parser.add_argument("--maxjet", type=int, default=15)
 parser.add_argument("--add-syst", type=float, default=default_add_syst)
 parser.add_argument("--sample-group", help="Sample group to plot") 
+parser.add_argument("--sample", help="Individual sample plot") 
 parser.add_argument("--pt", action="append", help="pT thresholds to plot") 
 parser.add_argument("--onlyMC16a", action="store_true")
 parser.add_argument("--ploterrorband", action="store_true")
@@ -76,7 +77,12 @@ groups = {
     "Wt"    : ("Wt1LMC","ttbarMC","WtttbarMC","dummy")
     }
 
-group = groups[opts.sample_group]
+if opts.sample_group:
+    group = groups[opts.sample_group]
+elif opts.sample:
+    group = (opts.sample,"dummy","dummy","dummy")
+    opts.sample_group = opts.sample
+    
 tag = opts.sample_group
 tag += "_int" if forinternal else ""
 if opts.pt != default_pts:
@@ -89,7 +95,7 @@ if opts.add_syst!=default_add_syst:
 offset = opts.maxjet-opts.minjet+1
 holder = []
 
-iofolder = os.getenv('SWUP_OUTPUTDIR')+"/../plots/mine/"
+iofolder = 'figures/Vjets_validation/'
 infile = iofolder+"Vscaling_files.root"
 samplefile = ROOT.TFile.Open(infile)
 
@@ -334,7 +340,7 @@ def main(m):
 
 
 class M(object):
-  def __init__(self):
+  def __init__(self, sample):
     thefcn1 = "[0] * pow([1],x-{minjet}) * tgamma([2]/[1] + [3] + x)*tgamma([3]+{minjet})/( tgamma({minjet} + [2]/[1] + [3]) * tgamma([3] + x) )".format(minjet=opts.minjet)
     thefcn2 = "[4] * pow([1],x-{minjet}-{offset}) * tgamma([2]/[1] + [3] + x-{offset})*tgamma([3]+{minjet})/( tgamma({minjet} + [2]/[1] + [3]) * tgamma([3] + x-{offset}) )".format(minjet=opts.minjet,offset=offset)
     self.fitfcn = ROOT.TF1("fitfcn","(x<%d-0.5) ? %s : %s"%(offset+opts.minjet,thefcn1,thefcn2),opts.minjet-0.5-2,offset+opts.maxjet+0.5)
@@ -344,11 +350,18 @@ class M(object):
     self.dummy = ROOT.TCanvas("dummy","dummy", 800, 800 )
     self.intcanvas = ROOT.TCanvas("jetn","jetn", 800, 1000 )
     self.pubcanvas = ROOT.TCanvas("pubjetn","pubjetn", 800, 1000 )
-    self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.45, 1., 1., 0, 0, 0 )
-    self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.15, 0, 0, 0) 
-    self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.15, 1., 0.25, 0, 0, 0) 
-    self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.25, 1., 0.35, 0, 0, 0) 
-    self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.35, 1., 0.45, 0, 0, 0) 
+    if sample:
+        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.50, 1., 1., 0, 0, 0 )
+        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0., 0, 0, 0) 
+        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.  , 1., 0.  , 0, 0, 0) 
+        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
+        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.25, 1., 0.50, 0, 0, 0) 
+    else:
+        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.45, 1., 1., 0, 0, 0 )
+        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.15, 0, 0, 0) 
+        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.15, 1., 0.25, 0, 0, 0) 
+        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.25, 1., 0.35, 0, 0, 0) 
+        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.35, 1., 0.45, 0, 0, 0) 
     self.intcanvas.cd()
     self.toppad.Draw()
     self.toppad.cd()
@@ -390,35 +403,38 @@ class M(object):
     self.legendsamp.SetBorderSize(0)
     self.legendsamp.SetShadowColor(10)
 
-    self.pubpad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
-    self.pubpad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.25, 1., 0.45, 0, 0, 0) 
-    self.pubpad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.45, 1., 0.65, 0, 0, 0) 
-    self.pubpad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.65, 1., 1.  , 0, 0, 0) 
-    self.pubcanvas.cd()
-    self.pubpad1.Draw()
-    self.pubpad1.cd()
-    self.pubpad1.SetLeftMargin(0.20)
-    self.pubpad1.SetTopMargin(0.)
-    self.pubpad1.SetBottomMargin(0.3333)
-    self.pubcanvas.cd()
-    self.pubpad2.Draw()
-    self.pubpad2.cd()
-    self.pubpad2.SetLeftMargin(0.20)
-    self.pubpad2.SetTopMargin(0.)
-    self.pubpad2.SetBottomMargin(0.0)
-    self.pubcanvas.cd()
-    self.pubpad3.Draw()
-    self.pubpad3.cd()
-    self.pubpad3.SetLeftMargin(0.20)
-    self.pubpad3.SetTopMargin(0.)
-    self.pubpad3.SetBottomMargin(0.0)
-    self.pubcanvas.cd()
-    self.pubpad4.Draw()
-    self.pubpad4.cd()
-    self.pubpad4.SetLeftMargin(0.20)
-    self.pubpad4.SetTopMargin(0.3333)
-    self.pubpad4.SetBottomMargin(0.0)
-    self.pubcanvas.cd()
+    if sample:
+        self.pubpad4 = self.bottompad3
+    else:
+        self.pubpad1 = ROOT.TPad("pubpad1", "pubpad1", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
+        self.pubpad2 = ROOT.TPad("pubpad2", "pubpad2", 0.0, 0.25, 1., 0.45, 0, 0, 0) 
+        self.pubpad3 = ROOT.TPad("pubpad3", "pubpad3", 0.0, 0.45, 1., 0.65, 0, 0, 0) 
+        self.pubpad4 = ROOT.TPad("pubpad4", "pubpad4", 0.0, 0.65, 1., 1.  , 0, 0, 0) 
+        self.pubcanvas.cd()
+        self.pubpad1.Draw()
+        self.pubpad1.cd()
+        self.pubpad1.SetLeftMargin(0.20)
+        self.pubpad1.SetTopMargin(0.)
+        self.pubpad1.SetBottomMargin(0.3333)
+        self.pubcanvas.cd()
+        self.pubpad2.Draw()
+        self.pubpad2.cd()
+        self.pubpad2.SetLeftMargin(0.20)
+        self.pubpad2.SetTopMargin(0.)
+        self.pubpad2.SetBottomMargin(0.0)
+        self.pubcanvas.cd()
+        self.pubpad3.Draw()
+        self.pubpad3.cd()
+        self.pubpad3.SetLeftMargin(0.20)
+        self.pubpad3.SetTopMargin(0.)
+        self.pubpad3.SetBottomMargin(0.0)
+        self.pubcanvas.cd()
+        self.pubpad4.Draw()
+        self.pubpad4.cd()
+        self.pubpad4.SetLeftMargin(0.20)
+        self.pubpad4.SetTopMargin(0.3333)
+        self.pubpad4.SetBottomMargin(0.0)
+        self.pubcanvas.cd()
 
     self.fittext = ROOT.TLatex()
     self.fittext.SetNDC()
@@ -469,5 +485,5 @@ def extendVjets(h1,h2,jetoffset=0):
     return h
 
 if __name__ == "__main__": 
-    m = M()
+    m = M(opts.sample)
     main(m)

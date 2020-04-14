@@ -23,9 +23,9 @@ opts = parser.parse_args()
 isData = "data" in opts.sample
 hists = {}
 cuts = { 
-    (40,None): None,
-    (60,None): None,
-    (80,None): None,
+#    (40,None): None,
+#    (60,None): None,
+#    (80,None): None,
     (20,'2j30'):  'jet_pt[1]>30e3', 
 #    (20,'2j25'):  'jet_pt[1]>25e3', 
 }
@@ -59,7 +59,7 @@ for (jetpt,cutname), cut in cuts.iteritems():
     tree.Draw("Sum$(jet_pt>%de3) >> %s" % (jetpt,histoname), cutstring.format(pt=jetpt),"",10000 if opts.quick_test else ROOT.TTree.kMaxEntries)
     hists[(jetpt,cutname)] = hjet
 
-outfile = os.getenv('SWUP_OUTPUTDIR')+"/../plots/mine/Vscaling_files.root"
+outfile = "figures/Vjets_validation/Vscaling_files.root"
 routfile = ROOT.TFile.Open(outfile,"update")
 for j in hists.itervalues():
     j.Write()
