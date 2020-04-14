@@ -38,43 +38,47 @@ ROOT.TH1.SetDefaultSumw2(1)
 ROOT.TVirtualFitter.SetMaxIterations(10000)
 
 coloroffset = 2
-forinternal = False
+forinternal = True
 
 
 samples = {
     "gammajets"          :("Data #gamma+jets",20,3, 0, None),
-    "multibosonsMC"      :("MC VV+jets",21,1, 0, None),
-    "wjets_madgraph"     :("MC W+jets (Madgraph)",26,2, 0, None),
+
+    "wjets_madgraph"     :("MC W+jets (Madgraph)",27,2, 0, None),
     "wjetsMC"            :("MC W+jets",26,2, 0, None),
     "zjetsMC"            :("MC Z+jets",32,3, 0, None),
+
+    "multibosonsMC"      :("MC VV+jets",24,1, 0, None),
+
     "Wt1LMC"             :("MC Wt",32,3, 0, None),
-    #"ttbarMC"            :("MC ttbar (1L+2L)",32,3, ("ttbar1LMC","ttbar2LMC")),
     "WtttbarMC"          :("MC ttbar+Wt",32,3, 0, ("Wt1LMC","ttbar1LMC","ttbar2LMC")), #dont rename, matches ttW
     "WtMCcommon"         :("MC Wt common fit",32,3, 0, ("Wt1LMC",)),
     "ttbarMCcommon"      :("MC ttbar common fit",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
+
     "ttbarMC"            :("MC ttbar",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
-    "ttbar_amcatnlo"     :("MC ttbar (ME)",32,3, 0, None),
-    "ttbar_herwig"       :("MC ttbar (PS)",32,3, 0, None),
-    "ttbar1LMC"          :("MC ttbar (1L)",32,3, 0, None),
-    "ttbar2LMC"          :("MC ttbar (2L)",26,3, 2, None),
-    "ttbar2LemubMC"      :("MC ttbar (2L) emu+bjet",32,3, 2, None),
-    "ttbar2LemuMC"       :("MC ttbar (2L) emu",32,3, 2, None),
-    "emubjetData"        :("Data emu+bjet",20,3, 2, None),
-    #"emubjetData"        :("Data emu+bjet",20,3, 2, ("emubjetData","-WtemubMC")),
-    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",32,3, 0, ("ttWMC","ttbar2LSSMC")),
-    "ttWMC"              :("MC ttW",32,3, 0, None),
-    "ttbar2LSSMC"           :("MC t#bar{t} fakes",32,3, 0, None),
+    "ttbar1LMC"          :("MC ttbar (1L)",24,3, 0, None),
+    "ttbar2LMC"          :("MC ttbar (2L)",28,3, 2, None),
+    "ttbar_amcatnlo"     :("MC ttbar (ME)",30,3, 0, None),
+    "ttbar_herwig"       :("MC ttbar (PS)",46,3, 0, None),
+
+    "emubjetData"        :("Data emu+bjet",21,3, 2, None),
+    "ttbar2LemubMC"      :("MC ttbar (2L) emu+bjet",25,3, 2, None),
+    "ttbar2LemuMC"       :("MC ttbar (2L) emu",36,3, 2, None),
+
+    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",46,3, 0, ("ttWMC","ttbar2LSSMC")),
+    "ttWMC"              :("MC ttW",28,3, 0, None),
+    "ttbar2LSSMC"        :("MC t#bar{t} fakes",30,3, 0, None),
     "dummy"              :("Dummy",32,3, 0, None),
     }
 
 groups = {
-    "Vjets" : ("wjetsMC","zjetsMC","wjets_madgraph","gammajets"),
-    "ttbar" : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubjetData"),
-    "ttbar1L" : ("ttbar1LMC","ttbarMC","WtttbarMC","dummy"),
+    "Vjets"     : ("wjetsMC","zjetsMC","wjets_madgraph","gammajets"),
+    "ttbar"     : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubjetData"),
+    "ttbar1L"   : ("ttbar1LMC","ttbarMC","WtttbarMC","dummy"),
     "ttbarsyst" : ("ttbarMC","ttbar_amcatnlo","ttbar_herwig","dummy"),
-    "SS3L"  : ("multibosonsMC","ttWMC","ttbar2LSSMC","ttWplusttbar2LSSMC"),
-    #"Wt"    : ("ttWt1LMC","Wt1LMC","ttbar1LMCcommon","Wt1LMCcommon"),
-    "Wt"    : ("Wt1LMC","ttbarMC","WtttbarMC","dummy")
+    "SS3L"      : ("multibosonsMC","ttWMC","ttbar2LSSMC","ttWplusttbar2LSSMC"),
+    "Wtcommon"  : ("WtttbarMC","Wt1LMC","ttbarMCcommon","WtMCcommon"),
+    "Wt"        : ("Wt1LMC","ttbarMC","WtttbarMC","dummy")
     }
 
 if opts.sample_group:
@@ -91,6 +95,8 @@ if opts.ploterrorband:
     tag += "_errorband"
 if opts.add_syst!=default_add_syst:
     tag += "%f"%opts.add_syst
+if opts.sample:
+    tag += "_sample"
 
 offset = opts.maxjet-opts.minjet+1
 holder = []
@@ -191,7 +197,7 @@ def main(m):
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.11, 0.8, -2.9, h.GetBinContent(h.GetMaximumBin()))
                     m.fitfcn.FixParameter(3,1)
                 elif "ttbar_herwig" in samplename:
-                    m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.12, -2.8, h.GetBinContent(h.GetMaximumBin()))
+                    m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.2, -0.8, h.GetBinContent(h.GetMaximumBin()))
                 else:
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.6, -1.1, h.GetBinContent(h.GetMaximumBin()))
             else:
@@ -205,7 +211,11 @@ def main(m):
             fitband = h.Clone()
             ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(fitband,0.68) #Set CL
             fitband.SetFillColorAlpha(ipt+coloroffset+1*(ipt>=3),0.5)
-            m.toppad.cd()
+            if opts.sample:
+                m.dummy.cd()
+            else:
+                m.toppad.cd()
+
             f = h.GetFunction("fitfcn")
             #f.SetLineColor(ROOT.kGray+1)
             f.SetLineColor(ipt+coloroffset+1*(ipt>=3))
@@ -218,10 +228,16 @@ def main(m):
             h.DrawCopy("func,E,P"+globalsame)
             if opts.ploterrorband:
                 fitband.DrawCopy("e5 same")
-            if isample==3: m.bottompad1.cd()
-            if isample==2: m.bottompad2.cd()
-            if isample==1: m.bottompad3.cd()
-            if isample==0: m.bottompad4.cd()
+            if opts.sample:
+                if ipt==3: m.bottompad1.cd()
+                if ipt==2: m.bottompad2.cd()
+                if ipt==1: m.bottompad3.cd()
+                if ipt==0: m.bottompad4.cd()
+            else:
+                if isample==3: m.bottompad1.cd()
+                if isample==2: m.bottompad2.cd()
+                if isample==1: m.bottompad3.cd()
+                if isample==0: m.bottompad4.cd()
 
     
             ratio = h.Clone()
@@ -234,16 +250,14 @@ def main(m):
             ratio.GetYaxis().SetTitleSize(17)
             ratio.GetYaxis().SetNdivisions(505)
             ratio.SetMarkerColor(ipt+coloroffset+1*(ipt>=3))
-            ratio.DrawCopy("hist,E,P"+same)
+            ratio.DrawCopy("hist,E,P"+("" if opts.sample else same))
             if fitres.Status()!=0:
                 m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             ratioband = fitband.Clone()
             ratioband.Divide(f)
             if opts.ploterrorband:
                 ratioband.DrawCopy("e5 same")
-            if forinternal:
-                m.fittext.DrawLatex(0.22+ipt*0.1,0.7*(1+0.10*(isample==3)),"#color[%d]{r=%.2f}"%(ipt+coloroffset+1*(ipt>=3),math.exp(f.GetParameter(1))))
-            if firstpt:
+            if firstpt or opts.sample:
                 line = ROOT.TLine(ratio.GetBinLowEdge(1),1,ratio.GetBinLowEdge(ratio.GetNbinsX()+1),1)
                 line.SetLineColor(ROOT.kGray)
                 line.Draw("same")
@@ -264,10 +278,13 @@ def main(m):
                     print "%d : %.3f" %(njet,max(stat,syst))
                     maxstatsyst[pt][njet] = max(maxstatsyst[pt].get(njet,0), max(stat,syst))
             #-------------------------------------
-            if isample==3: m.pubpad1.cd()
-            if isample==2: m.pubpad2.cd()
-            if isample==1: m.pubpad3.cd()
-            if isample==0: m.pubpad4.cd()
+            if opts.sample:
+                m.toppad.cd()
+            else:
+                if isample==3: m.pubpad1.cd()
+                if isample==2: m.pubpad2.cd()
+                if isample==1: m.pubpad3.cd()
+                if isample==0: m.pubpad4.cd()
             consecutiveratio = h.Clone()
             for b in range(consecutiveratio.GetNbinsX()+1):
                 yield1 = consecutiveratio.GetBinContent(b)
@@ -282,22 +299,25 @@ def main(m):
                 consecutiveratio.SetBinError(b,sqrt(pow(error1/yield1,2)+pow(error2/yield2,2))*yield2/yield1)
             yaxis = consecutiveratio.GetYaxis()
             xaxis = consecutiveratio.GetXaxis()
-            if "tt" in samplename or "emu" in samplename:
+            if "tt" in samplename or "emu" in samplename or opts.sample:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,1.29)
             else:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,0.49)
             yaxis.SetTitle("r(j) "+shortname+ " "*ratiospace)
             yaxis.SetTitleSize(0.8* yaxis.GetTitleSize())
             #xaxis.SetTitleSize(0.03)
-            xaxis.SetTitleOffset(4)
+            if opts.sample:
+                xaxis.SetTitleOffset(2)
+            else:
+                xaxis.SetTitleOffset(4)
             xaxis.SetRangeUser(opts.minjet-0.5-sampleoffset,opts.maxjet-0.5-sampleoffset)
             consecutiveratio.SetMarkerColor(ipt+coloroffset+1*(ipt>=3))
             consecutiveratio.SetLineColor(ipt+coloroffset+1*(ipt>=3))
-            consecutiveratio.GetYaxis().SetNdivisions(505)
+            yaxis.SetNdivisions(505)
             for b in range(1,h.GetNbinsX()+1):
                 bcenter = h.GetBinCenter(b)
-                consecutiveratio.GetXaxis().SetBinLabel(b,"%d/%d"%(bcenter+1,bcenter))
-            consecutiveratio.GetXaxis().SetTitle("(N_{jets}+1)/N_{jets}")
+                xaxis.SetBinLabel(b,"%d/%d"%(bcenter+1,bcenter))
+            xaxis.SetTitle("(N_{jets}+1)/N_{jets}")
             consecutiveratio.DrawCopy("E,P,hist"+same)
             m.ratiofcn.SetParameters(f.GetParameter(1),f.GetParameter(2),f.GetParameter(3))
             m.ratiofcn.SetLineStyle(2)
@@ -309,23 +329,28 @@ def main(m):
             errorgraph.SetFillColorAlpha(ipt+coloroffset+1*(ipt>=3),0.5)
             if opts.ploterrorband:
                 errorgraph.Draw("same4")
-            if fitres.Status()!=0:
+            if fitres.Status()!=0 and forinternal:
                 m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             if firstsample:
-                m.legendpt.AddEntry(h,"jet p_{T} > %s GeV" % pt,"l")
+                m.legendpt.AddEntry(h,"jet p_{T} > %s GeV" % pt.split("_")[0],"l")
                 print "AddEntry",pt
             firstpt = False
             usedsample = True
         if usedsample: 
             firstsample = False
-            m.legendsamp.AddEntry(h,legendname,"p")
+            hsample = h.Clone(h.GetName()+"samp")
+            hsample.SetMarkerColor(1)
+            holder.append(hsample)
+            m.legendsamp.AddEntry(hsample,legendname,"p")
     m.pubpad4.cd()
     addLegendToPad(m)
-    m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.png"%tag)
-    m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.pdf"%tag)
+    if not opts.sample:
+        m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.png"%tag)
+        m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.pdf"%tag)
     m.toppad.cd()
-    addLegendToPad(m)
-    m.toppad.SetLogy(1)
+    addLegendToPad(m,first=False)
+    if not opts.sample:
+        m.toppad.SetLogy(1)
     m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.pdf"%tag)
     m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.png"%tag)
     if opts.print_syst:
@@ -350,23 +375,20 @@ class M(object):
     self.dummy = ROOT.TCanvas("dummy","dummy", 800, 800 )
     self.intcanvas = ROOT.TCanvas("jetn","jetn", 800, 1000 )
     self.pubcanvas = ROOT.TCanvas("pubjetn","pubjetn", 800, 1000 )
-    if sample:
-        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.50, 1., 1., 0, 0, 0 )
-        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0., 0, 0, 0) 
-        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.  , 1., 0.  , 0, 0, 0) 
-        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
-        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.25, 1., 0.50, 0, 0, 0) 
-    else:
-        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.45, 1., 1., 0, 0, 0 )
-        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.15, 0, 0, 0) 
-        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.15, 1., 0.25, 0, 0, 0) 
-        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.25, 1., 0.35, 0, 0, 0) 
-        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.35, 1., 0.45, 0, 0, 0) 
+
+    self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.45, 1., 1., 0, 0, 0 )
+    self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.15, 0, 0, 0) 
+    self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.15, 1., 0.25, 0, 0, 0) 
+    self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.25, 1., 0.35, 0, 0, 0) 
+    self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.35, 1., 0.45, 0, 0, 0) 
+
     self.intcanvas.cd()
     self.toppad.Draw()
     self.toppad.cd()
     self.toppad.SetLeftMargin(0.20)
     self.toppad.SetBottomMargin(0.)
+    if opts.sample:
+        self.toppad.SetBottomMargin(0.2)
     self.intcanvas.cd()
     self.bottompad1.Draw()
     self.bottompad1.cd()
@@ -403,38 +425,35 @@ class M(object):
     self.legendsamp.SetBorderSize(0)
     self.legendsamp.SetShadowColor(10)
 
-    if sample:
-        self.pubpad4 = self.bottompad3
-    else:
-        self.pubpad1 = ROOT.TPad("pubpad1", "pubpad1", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
-        self.pubpad2 = ROOT.TPad("pubpad2", "pubpad2", 0.0, 0.25, 1., 0.45, 0, 0, 0) 
-        self.pubpad3 = ROOT.TPad("pubpad3", "pubpad3", 0.0, 0.45, 1., 0.65, 0, 0, 0) 
-        self.pubpad4 = ROOT.TPad("pubpad4", "pubpad4", 0.0, 0.65, 1., 1.  , 0, 0, 0) 
-        self.pubcanvas.cd()
-        self.pubpad1.Draw()
-        self.pubpad1.cd()
-        self.pubpad1.SetLeftMargin(0.20)
-        self.pubpad1.SetTopMargin(0.)
-        self.pubpad1.SetBottomMargin(0.3333)
-        self.pubcanvas.cd()
-        self.pubpad2.Draw()
-        self.pubpad2.cd()
-        self.pubpad2.SetLeftMargin(0.20)
-        self.pubpad2.SetTopMargin(0.)
-        self.pubpad2.SetBottomMargin(0.0)
-        self.pubcanvas.cd()
-        self.pubpad3.Draw()
-        self.pubpad3.cd()
-        self.pubpad3.SetLeftMargin(0.20)
-        self.pubpad3.SetTopMargin(0.)
-        self.pubpad3.SetBottomMargin(0.0)
-        self.pubcanvas.cd()
-        self.pubpad4.Draw()
-        self.pubpad4.cd()
-        self.pubpad4.SetLeftMargin(0.20)
-        self.pubpad4.SetTopMargin(0.3333)
-        self.pubpad4.SetBottomMargin(0.0)
-        self.pubcanvas.cd()
+    self.pubpad1 = ROOT.TPad("pubpad1", "pubpad1", 0.0, 0.  , 1., 0.25, 0, 0, 0) 
+    self.pubpad2 = ROOT.TPad("pubpad2", "pubpad2", 0.0, 0.25, 1., 0.45, 0, 0, 0) 
+    self.pubpad3 = ROOT.TPad("pubpad3", "pubpad3", 0.0, 0.45, 1., 0.65, 0, 0, 0) 
+    self.pubpad4 = ROOT.TPad("pubpad4", "pubpad4", 0.0, 0.65, 1., 1.  , 0, 0, 0) 
+    self.pubcanvas.cd()
+    self.pubpad1.Draw()
+    self.pubpad1.cd()
+    self.pubpad1.SetLeftMargin(0.20)
+    self.pubpad1.SetTopMargin(0.)
+    self.pubpad1.SetBottomMargin(0.3333)
+    self.pubcanvas.cd()
+    self.pubpad2.Draw()
+    self.pubpad2.cd()
+    self.pubpad2.SetLeftMargin(0.20)
+    self.pubpad2.SetTopMargin(0.)
+    self.pubpad2.SetBottomMargin(0.0)
+    self.pubcanvas.cd()
+    self.pubpad3.Draw()
+    self.pubpad3.cd()
+    self.pubpad3.SetLeftMargin(0.20)
+    self.pubpad3.SetTopMargin(0.)
+    self.pubpad3.SetBottomMargin(0.0)
+    self.pubcanvas.cd()
+    self.pubpad4.Draw()
+    self.pubpad4.cd()
+    self.pubpad4.SetLeftMargin(0.20)
+    self.pubpad4.SetTopMargin(0.3333)
+    self.pubpad4.SetBottomMargin(0.0)
+    self.pubcanvas.cd()
 
     self.fittext = ROOT.TLatex()
     self.fittext.SetNDC()
@@ -442,13 +461,16 @@ class M(object):
     self.fittext.SetTextFont(43)
 
 
-def addLegendToPad(m):
+def addLegendToPad(m,first=True):
     m.legendpt.Draw()
-    dummyf = ROOT.TF1()
-    dummyf.SetLineStyle(2)
-    dummyf.SetLineWidth(2)
-    dummyf.SetLineColor(ROOT.kGray+1)
-    m.legendsamp.AddEntry(dummyf,"Parameterized fit","l")
+    if first:
+        dummyf = ROOT.TF1()
+        dummyf.SetLineStyle(2)
+        dummyf.SetLineWidth(2)
+        dummyf.SetLineColor(ROOT.kGray+1)
+        m.legendsamp.AddEntry(dummyf,"Parameterized fit","l")
+        holder.append(dummyf)
+        
     m.legendsamp.Draw()
     atl = ROOT.TLatex(0.24,0.84,"ATLAS Internal")
     atl.SetNDC()
