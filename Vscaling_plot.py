@@ -38,8 +38,7 @@ ROOT.TH1.SetDefaultSumw2(1)
 ROOT.TVirtualFitter.SetMaxIterations(10000)
 
 coloroffset = 2
-forinternal = True
-
+forinternal = False
 
 samples = {
     "gammajets"          :("Data #gamma+jets",20,3, 0, None),
@@ -87,6 +86,7 @@ elif opts.sample:
     group = (opts.sample,"dummy","dummy","dummy")
     opts.sample_group = opts.sample
     
+loglikelihoodfit=False
 tag = opts.sample_group
 tag += "_int" if forinternal else ""
 if opts.pt != default_pts:
@@ -97,6 +97,8 @@ if opts.add_syst!=default_add_syst:
     tag += "%f"%opts.add_syst
 if opts.sample:
     tag += "_sample"
+if loglikelihoodfit:
+    tag += "_llp"
 
 offset = opts.maxjet-opts.minjet+1
 holder = []
@@ -119,6 +121,9 @@ def getSampleHisto(samplename,pt,opts):
         if "Data" in sub:
             mc16part = "data15" if opts.onlyMC16a else "data"
         histoname = "njet_%s_%s_%s"%(sub,mc16part,pt)
+        print histoname
+        if histoname == "njet_Wt1LMC_mc16_20_2j30":
+            histoname = histoname.replace("Wt1LMC","WtMC")
         if "gammajets" in sub:
             histoname = "njet_%s_%s"%(sub,pt)
         if not h:
@@ -185,17 +190,20 @@ def main(m):
             m.dummy.cd()
             m.fitfcn.SetParLimits(1,0,3)
             m.fitfcn.SetParLimits(2,0,3)
+            loglikelihoodfit=False
             if "tt" in samplename or "Wt" in samplename or "emu" in samplename:
                 m.fitfcn.ReleaseParameter(3)
-                m.fitfcn.SetParLimits(3,-3.5,3.2)
-                m.fitfcn.SetParLimits(2,0,2.0)
+                m.fitfcn.SetParLimits(3,-3.0,3.2)
+                m.fitfcn.SetParLimits(2,0,3.0)
                 if not "common" in samplename:
                     m.fitfcn.FixParameter(4,0)
                 else:
                     m.fitfcn.ReleaseParameter(4)
                 if "ttW" in samplename:
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.11, 0.8, -2.9, h.GetBinContent(h.GetMaximumBin()))
-                    m.fitfcn.FixParameter(3,1)
+                    #m.fitfcn.FixParameter(3,1)
+                elif "ttbar_herwig" in samplename and "20" in pt:
+                    m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.2, -2.8, h.GetBinContent(h.GetMaximumBin()))
                 elif "ttbar_herwig" in samplename:
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.2, -0.8, h.GetBinContent(h.GetMaximumBin()))
                 else:
@@ -207,7 +215,13 @@ def main(m):
                     m.fitfcn.ReleaseParameter(4)
                 else:
                     m.fitfcn.FixParameter(4,0)
-            fitres = h.Fit("fitfcn",'S')
+            if "ttbar2LSSMC" in samplename or "ttWMC" in samplename  or ("madgraph" in samplename and "80" in pt):
+                loglikelihoodfit=True
+            if loglikelihoodfit:
+                print "LOGLIKELIHOOD FIT ---------------------------"
+                fitres = h.Fit("fitfcn",'S,WL')
+            else:
+                fitres = h.Fit("fitfcn",'S')
             fitband = h.Clone()
             ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(fitband,0.68) #Set CL
             fitband.SetFillColorAlpha(ipt+coloroffset+1*(ipt>=3),0.5)
@@ -251,7 +265,7 @@ def main(m):
             ratio.GetYaxis().SetNdivisions(505)
             ratio.SetMarkerColor(ipt+coloroffset+1*(ipt>=3))
             ratio.DrawCopy("hist,E,P"+("" if opts.sample else same))
-            if fitres.Status()!=0:
+            if fitres.Status()!=0 and forinternal:
                 m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             ratioband = fitband.Clone()
             ratioband.Divide(f)
@@ -299,7 +313,7 @@ def main(m):
                 consecutiveratio.SetBinError(b,sqrt(pow(error1/yield1,2)+pow(error2/yield2,2))*yield2/yield1)
             yaxis = consecutiveratio.GetYaxis()
             xaxis = consecutiveratio.GetXaxis()
-            if "tt" in samplename or "emu" in samplename or opts.sample:
+            if "Wt" in samplename or "tt" in samplename or "emu" in samplename or opts.sample:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,1.29)
             else:
                 yaxis.SetRangeUser(0. if isample==3 else 0.01,0.49)
@@ -345,14 +359,12 @@ def main(m):
     m.pubpad4.cd()
     addLegendToPad(m)
     if not opts.sample:
-        m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.png"%tag)
         m.pubcanvas.SaveAs(iofolder+"Vscaling_jetn_ratios_%s.pdf"%tag)
     m.toppad.cd()
     addLegendToPad(m,first=False)
     if not opts.sample:
         m.toppad.SetLogy(1)
     m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.pdf"%tag)
-    m.intcanvas.SaveAs(iofolder+"Vscaling_jetn_%s.png"%tag)
     if opts.print_syst:
         for pt, syst in maxsyst.iteritems():
             print "Max syst",pt
@@ -451,7 +463,7 @@ class M(object):
     self.pubpad4.Draw()
     self.pubpad4.cd()
     self.pubpad4.SetLeftMargin(0.20)
-    self.pubpad4.SetTopMargin(0.3333)
+    self.pubpad4.SetTopMargin(0.4)
     self.pubpad4.SetBottomMargin(0.0)
     self.pubcanvas.cd()
 
