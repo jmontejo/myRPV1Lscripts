@@ -30,7 +30,6 @@ emubcut_weight="(n_el==1 && n_mu==1 && Sum\$(jet_pt>{pt}e3 && jet_bjet)>=1)" #{p
 ./Vscaling_plot.py --sample WtttbarMC          
 ./Vscaling_plot.py --sample ttbarMC            
 ./Vscaling_plot.py --sample ttbar1LMC          
-./Vscaling_plot.py --sample ttbar2LMC          
 ./Vscaling_plot.py --sample ttbar_amcatnlo     
 ./Vscaling_plot.py --sample ttbar_herwig       
 ./Vscaling_plot.py --sample emubjetData        
@@ -41,6 +40,7 @@ emubcut_weight="(n_el==1 && n_mu==1 && Sum\$(jet_pt>{pt}e3 && jet_bjet)>=1)" #{p
 ./Vscaling_plot.py --sample ttbar2LSSMC        
 
 ./Vscaling_plot.py --sample-group ttbar
+./Vscaling_plot.py --sample-group ttbar2L
 ./Vscaling_plot.py --sample-group ttbarsyst
 ./Vscaling_plot.py --sample-group SS3L
 ./Vscaling_plot.py --sample-group Vjets

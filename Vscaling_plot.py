@@ -71,8 +71,10 @@ samples = {
     }
 
 groups = {
+    "gammajets" : ("gammajets","dummy","dummy","dummy"),
     "Vjets"     : ("wjetsMC","zjetsMC","wjets_madgraph","gammajets"),
     "ttbar"     : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubjetData"),
+    "ttbar2L"   : ("ttbar2LemuMC","ttbar2LemubMC","emubjetData","dummy"),
     "ttbar1L"   : ("ttbar1LMC","ttbarMC","WtttbarMC","dummy"),
     "ttbarsyst" : ("ttbarMC","ttbar_amcatnlo","ttbar_herwig","dummy"),
     "SS3L"      : ("multibosonsMC","ttWMC","ttbar2LSSMC","ttWplusttbar2LSSMC"),
@@ -108,7 +110,6 @@ infile = iofolder+"Vscaling_files.root"
 samplefile = ROOT.TFile.Open(infile)
 
 def getSampleHisto(samplename,pt,opts):
-    print "getSampleHisto",samplename
     h = None
     a, b, c, d, subsamples = samples[samplename]
     if not subsamples: subsamples = [samplename]
@@ -121,7 +122,6 @@ def getSampleHisto(samplename,pt,opts):
         if "Data" in sub:
             mc16part = "data15" if opts.onlyMC16a else "data"
         histoname = "njet_%s_%s_%s"%(sub,mc16part,pt)
-        print histoname
         if histoname == "njet_Wt1LMC_mc16_20_2j30":
             histoname = histoname.replace("Wt1LMC","WtMC")
         if "gammajets" in sub:
@@ -131,7 +131,7 @@ def getSampleHisto(samplename,pt,opts):
             if tmp:
                 h = tmp.Clone(samplename)
         else:
-            if sub == "ttbar2LMC":
+            if sub == "ttbar2LMC": #shift by two jets
                 tmp1L = h.Clone()
                 tmp2L = samplefile.Get(histoname)
                 for ib in range(tmp1L.GetNbinsX()):
@@ -140,10 +140,6 @@ def getSampleHisto(samplename,pt,opts):
                 h.Add( tmp1L , subweight)
             else:
                 h.Add( samplefile.Get(histoname) , subweight)
-        if h:
-            print "After",sub,h.Integral()
-        else:
-            print "Empty",sub
     return h
 
 def main(m):
@@ -170,10 +166,10 @@ def main(m):
                 continue
             else: print "Will process",samplename,pt
             #h.SetDirectory(0)
-            if "wjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("wjets","zjets"),pt,opts))
-            if "zjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("zjets","wjets"),pt,opts))
-            if "ttbarMCcommon" in samplename: h = extendVjets(h, getSampleHisto(samplename.replace("ttbar","Wt"),pt,opts))
-            if "WtMCcommon" in samplename:    h = extendVjets(h, getSampleHisto(samplename.replace("Wt","ttbar"),pt,opts))
+            if not opts.sample and "wjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("wjets","zjets"),pt,opts))
+            if not opts.sample and "zjetsMC" in samplename:       h = extendVjets(h, getSampleHisto(samplename.replace("zjets","wjets"),pt,opts))
+            if not opts.sample and "ttbarMCcommon" in samplename: h = extendVjets(h, getSampleHisto(samplename.replace("ttbar","Wt"),pt,opts))
+            if not opts.sample and "WtMCcommon" in samplename:    h = extendVjets(h, getSampleHisto(samplename.replace("Wt","ttbar"),pt,opts))
             holder.append(h)
             for b in range(h.GetNbinsX()):
                 if h.GetBinContent(b+1) < 0.01: 
@@ -185,7 +181,7 @@ def main(m):
             h.SetMarkerStyle(imarker)
             h.SetLineColor(ipt+coloroffset+1*(ipt>=3))
             h.SetMarkerColor(ipt+coloroffset+1*(ipt>=3))
-            h.SetMinimum(2e-11)
+            h.SetMinimum(0.02)
             h.SetMaximum(1e8)
             m.dummy.cd()
             m.fitfcn.SetParLimits(1,0,3)

@@ -72,7 +72,7 @@ for (pt,addcutname), addcut in cuts.iteritems():
         for i in xrange(13+offset,hbkgforplot.GetNbinsX()+1):
             hbkgcut.SetBinContent(i,0)
         if intermediatePlots or fitres.Status()!=0: 
-            coolPlot("ph_fit_%s%s%s" % (jetname,ptname,addnametag),[hdata,hbkgforplot,hbkgcut],folder="plots/mine/gamma_jets",plotratio=False)
+            coolPlot("ph_fit_%s%s%s" % (jetname,ptname,addnametag),[hdata,hbkgforplot,hbkgcut],folder="figures/Vjets_validation/gamma_jets",plotratio=False)
         bkgerror = root.Double(0)
         dataerror = root.Double(0)
         bkginteg = hbkgforplot.IntegralAndError(0,12+offset,bkgerror)
