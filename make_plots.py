@@ -7,6 +7,7 @@ pool = Pool(8)
 folder = os.getenv('SWUP_OUTPUTDIR')+"/../"
 
 years = ["2015_2016","2017","2018","2015_2018"]
+years = ["2015_2016","2017","2018"]
 thevars = {
     "baseel_pt[0]": "",
     "baseel_eta[0]": "",
@@ -37,7 +38,8 @@ for year in years:
     cut = "(%s)*(%s)"%(bothcut,rawcut)
 
     for varname, varextra in thevars.iteritems():
-        if (cutname=="el" or cutname=="mu") and (varname.startswith("baseel_") or varname.startswith("basemu_")): continue
+        if varname.startswith("baseel_") and not cutname=="el": continue
+        if varname.startswith("basemu_") and not cutname=="mu": continue
         if "2L" in cutname or "dilep_m" in varname: 
             samplecut = 'Fakes#0'
         else:

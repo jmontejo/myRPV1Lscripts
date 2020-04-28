@@ -8,6 +8,7 @@ parser.add_argument("--btagger", default='77')
 parser.add_argument("--cut", default="")
 parser.add_argument("--fast", action="store_true")
 parser.add_argument("--cutname", default="")
+parser.add_argument("--pack", help="Run only this pack, default is all")
 opts = parser.parse_args()
 
 import ROOT as ROOT
@@ -38,8 +39,8 @@ maxjets = opts.max_jets
 def printDict(corrs,L,k,x0,btagger,pt,cut):
     if not btagger: btagger="70"
     pt_cut = str(pt)+cut if cut else pt
-    sumerr = sum([1./cerr*cerr for c,cerr in corrs[:-1]])
-    sumc   = sum([c/cerr*cerr for c,cerr in corrs[:-1]])
+    sumerr = sum([1./cerr for c,cerr in corrs[:-1]])
+    sumc   = sum([c/cerr for c,cerr in corrs[:-1]])
     corr = sumc/sumerr
     block = """
     _fixedvalues['{btag}_{pt}']={{
@@ -52,7 +53,15 @@ def printDict(corrs,L,k,x0,btagger,pt,cut):
     print block
 
 packs = {
-#"Nominal": ("ttbar_nohf",)
+"ttV": (
+    ("ttV_sherpa_nohf", ""),
+),
+"Nominal": (("ttbar_nohf", ""),),
+"Rad"    : (
+    ("ttbar_nohf", ""),
+    ("ttbar_nohf_weight_Rad_High", ""),
+    ("ttbar_nohf_weight_Rad_Low", ""),
+    ),
 "Syst"   : (
     ("ttbar_nohf", ""),
 #    ("ttbar_amcatnlo_nohf", "aMcAtNlo"),
@@ -101,6 +110,7 @@ myf.SetParameters(8.16905e-01,1.56430e-01,-3.36409e+00)
 haccnils = ROOT.TH1F("haccnils","haccnils",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
 hcorrel = ROOT.TH1F("hcorrel","hcorrel",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
 for pack,samples in packs.iteritems():
+    if opts.pack and opts.pack!=pack: continue
     map_correl = []
     map_accnils = []
     for sample,samplepattern in samples:
@@ -133,7 +143,11 @@ for pack,samples in packs.iteritems():
             weight += "*sf_total__SYST_FT_EFF_B_systematics__1down/sf_total"
         if "nohf" in sample:
             weight += "*(n_truth_C<2)*(n_truth_B==2)"
-        if "weight" in sample:
+        if "weight_Rad_High" in sample:
+            weight += "*(weight_shower_up*weight_scale_muR05_muF05)"
+        elif "weight_Rad_Low" in sample:
+            weight += "*(weight_shower_down*weight_scale_muR20_muF20)"
+        elif "weight" in sample:
             sysweight = sample[sample.find("weight"):]
             weight += "*(%s)"%sysweight
 
@@ -176,7 +190,7 @@ for pack,samples in packs.iteritems():
             hcorrel.SetBinError(j+1,Cbacc_err)
             haccnils.SetBinContent(j+1,accnils)
             haccnils.SetBinError(j+1,accnils_err)
-        if sample=="ttbar_nohf":
+        if sample=="ttbar_nohf" or sample=="ttV_sherpa_nohf":
             haccnils.Fit("myf")
             printDict(correlations,myf.GetParameter(0),myf.GetParameter(1),myf.GetParameter(2),opts.btagger,opts.pt,opts.cutname)
         map_correl.append( hcorrel.Clone(samplename+hcorrel.GetName()) )
