@@ -276,12 +276,14 @@ def main(m):
                 print "Syst",samplename, pt
                 for b in range(1,ratio.GetNbinsX()+1):
                     njet = b+3 #assume all start from 4 jet, include offset for dilepton
+                    if njet > opts.maxjet: break
                     syst = abs(1-ratio.GetBinContent(b))
                     print "%d : %.3f" %(njet,syst)
                     maxsyst[pt][njet] = max(maxsyst[pt].get(njet,0), syst)
                 print "Syst+stat",samplename, pt
                 for b in range(1,ratio.GetNbinsX()+1):
                     njet = b+3 #assume all start from 4 jet, include offset for dilepton
+                    if njet > opts.maxjet: break
                     syst = abs(1-ratio.GetBinContent(b))
                     try: stat =  ratio.GetBinError(b)/ratio.GetBinContent(b)
                     except: stat = 1
@@ -365,11 +367,11 @@ def main(m):
         for pt, syst in maxsyst.iteritems():
             print "Max syst",pt
             for njet, jsyst in syst.iteritems():
-                print njet, round(jsyst,3)
+                print "\t\t%d : %.3f," %(njet, jsyst)
         for pt, statsyst in maxstatsyst.iteritems():
             print "Max stat+syst",pt
             for njet, jstatsyst in statsyst.iteritems():
-                print njet, round(jstatsyst,3)
+                print "\t\t%d : %.3f," %(njet, jstatsyst)
 
 
 class M(object):
@@ -380,6 +382,8 @@ class M(object):
     self.ratiofcn = ROOT.TF1("ratiofcn","[0] + [1]/(x+[2])",opts.minjet-0.5-2,opts.maxjet+0.5)
     self.lines = []
     
+    activepanels = 4 if opts.sample else 4- group.count("dummy")
+
     self.dummy = ROOT.TCanvas("dummy","dummy", 800, 800 )
     self.intcanvas = ROOT.TCanvas("jetn","jetn", 800, 1000 )
     self.pubcanvas = ROOT.TCanvas("pubjetn","pubjetn", 800, 1000 )
@@ -389,6 +393,15 @@ class M(object):
     self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.15, 1., 0.25, 0, 0, 0) 
     self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.25, 1., 0.35, 0, 0, 0) 
     self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.35, 1., 0.45, 0, 0, 0) 
+    if activepanels == 3:
+        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.10, 0, 0, 0) 
+        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.10, 1., 0.25, 0, 0, 0) 
+    elif activepanels == 1:
+        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.25, 1., 1., 0, 0, 0 )
+        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0., 0, 0, 0) 
+        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.  , 1., 0., 0, 0, 0) 
+        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.  , 1., 0., 0, 0, 0) 
+        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.00, 1., 0.25, 0, 0, 0) 
 
     self.intcanvas.cd()
     self.toppad.Draw()
@@ -409,6 +422,8 @@ class M(object):
     self.bottompad2.SetLeftMargin(0.20)
     self.bottompad2.SetTopMargin(0.)
     self.bottompad2.SetBottomMargin(0.0)
+    if activepanels == 3:
+        self.bottompad2.SetBottomMargin(0.3333)
     self.intcanvas.cd()
     self.bottompad3.Draw()
     self.bottompad3.cd()
@@ -421,6 +436,8 @@ class M(object):
     self.bottompad4.SetLeftMargin(0.20)
     self.bottompad4.SetTopMargin(0.)
     self.bottompad4.SetBottomMargin(0.0)
+    if activepanels == 1:
+        self.bottompad4.SetBottomMargin(0.3333)
     self.intcanvas.cd()
     self.legendpt = ROOT.TLegend( 0.47,0.7,0.66,0.9)
     self.legendpt.SetFillStyle(0)
@@ -437,6 +454,9 @@ class M(object):
     self.pubpad2 = ROOT.TPad("pubpad2", "pubpad2", 0.0, 0.25, 1., 0.45, 0, 0, 0) 
     self.pubpad3 = ROOT.TPad("pubpad3", "pubpad3", 0.0, 0.45, 1., 0.65, 0, 0, 0) 
     self.pubpad4 = ROOT.TPad("pubpad4", "pubpad4", 0.0, 0.65, 1., 1.  , 0, 0, 0) 
+    if activepanels == 3:
+        self.pubpad1 = ROOT.TPad("pubpad1", "pubpad1", 0.0, 0.  , 1., 0.20, 0, 0, 0) 
+        self.pubpad2 = ROOT.TPad("pubpad2", "pubpad2", 0.0, 0.20, 1., 0.45, 0, 0, 0) 
     self.pubcanvas.cd()
     self.pubpad1.Draw()
     self.pubpad1.cd()
@@ -449,6 +469,8 @@ class M(object):
     self.pubpad2.SetLeftMargin(0.20)
     self.pubpad2.SetTopMargin(0.)
     self.pubpad2.SetBottomMargin(0.0)
+    if activepanels == 3:
+        self.pubpad2.SetBottomMargin(0.3333)
     self.pubcanvas.cd()
     self.pubpad3.Draw()
     self.pubpad3.cd()
@@ -461,6 +483,8 @@ class M(object):
     self.pubpad4.SetLeftMargin(0.20)
     self.pubpad4.SetTopMargin(0.4)
     self.pubpad4.SetBottomMargin(0.0)
+    if activepanels == 1:
+        self.pubpad4.SetBottomMargin(0.3333)
     self.pubcanvas.cd()
 
     self.fittext = ROOT.TLatex()
