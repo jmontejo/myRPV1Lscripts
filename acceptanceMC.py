@@ -107,8 +107,8 @@ sigmoid = "([0]/(1+exp(-[1]*(x-[2]))))"
 myf = ROOT.TF1("myf",sigmoid,minjets-0.5,maxjets+0.5)
 myf.SetParameters(8.16905e-01,1.56430e-01,-3.36409e+00)
 
-haccnils = ROOT.TH1F("haccnils","haccnils",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
-hcorrel = ROOT.TH1F("hcorrel","hcorrel",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
+haccnils = ROOT.TH1D("haccnils","haccnils",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
+hcorrel = ROOT.TH1D("hcorrel","hcorrel",maxjets-minjets+1,minjets-0.5,maxjets+0.5)
 for pack,samples in packs.iteritems():
     if opts.pack and opts.pack!=pack: continue
     map_correl = []
@@ -130,7 +130,7 @@ for pack,samples in packs.iteritems():
             print "Something wrong here",sample,samplepattern,samplefolder,len(files)
             sys.exit(1)
         samplename = nicename(sample)
-        hbjets2d = ROOT.TH2F("hbjets2d","hbjets2d",3,-0.5,2.5,maxjets-minjets+1,minjets - 0.5, maxjets + 0.5)
+        hbjets2d = ROOT.TH2D("hbjets2d","hbjets2d",3,-0.5,2.5,maxjets-minjets+1,minjets - 0.5, maxjets + 0.5)
         
         haccnils.SetTitle("%s;number of jets;#epsilon_{b}" % samplename)
         hcorrel      .SetTitle("%s;number of jets;Correlation factor" % samplename)

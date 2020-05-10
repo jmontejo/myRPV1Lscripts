@@ -528,7 +528,7 @@ def GetErrorGraph(f):
 
 def extendVjets(h1,h2,jetoffset=0):
     if not h2: jetoffset=0
-    h = ROOT.TH1F(h1.GetName()+"ext",h1.GetTitle()+"ext",offset+opts.maxjet-opts.minjet+1,opts.minjet-0.5,offset+opts.maxjet+0.5)
+    h = ROOT.TH1D(h1.GetName()+"ext",h1.GetTitle()+"ext",offset+opts.maxjet-opts.minjet+1,opts.minjet-0.5,offset+opts.maxjet+0.5)
     h.SetDirectory(0)
     for b in range(h1.GetNbinsX()):
         h.SetBinContent(b+1+jetoffset,h1.GetBinContent(b+1))

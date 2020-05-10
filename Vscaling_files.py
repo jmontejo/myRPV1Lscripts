@@ -54,7 +54,7 @@ for (jetpt,cutname), cut in cuts.iteritems():
         tag += "_"+cutname
         cutstring += "*(%s)"% cut
     histoname = "njet_%s_%s"%(opts.outsample,tag)
-    hjet = ROOT.TH1F(histoname,histoname+";Number of jets;Events",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
+    hjet = ROOT.TH1D(histoname,histoname+";Number of jets;Events",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
     print ("Sum$(jet_pt>%de3) >> %s" % (jetpt,histoname), cutstring)
     tree.Draw("Sum$(jet_pt>%de3) >> %s" % (jetpt,histoname), cutstring.format(pt=jetpt),"",10000 if opts.quick_test else ROOT.TTree.kMaxEntries)
     hists[(jetpt,cutname)] = hjet

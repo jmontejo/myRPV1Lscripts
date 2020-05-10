@@ -23,12 +23,12 @@ cuts = {
     (20,'2j25'):  'jet_pt[1]>25e3', 
 }
 
-hdata = root.TH1F("hdata","hdata;topoETcone40 - 0.022*p_{T}^{#gamma} [GeV];Events/bin",60,-9.55,50.45)
-hbkg = root.TH1F("hbkg","hbkg",60,-9.55,50.45)
-hcut = root.TH1F("hcut","hcut",60,-9.55,50.45)
+hdata = root.TH1D("hdata","hdata;topoETcone40 - 0.022*p_{T}^{#gamma} [GeV];Events/bin",60,-9.55,50.45)
+hbkg = root.TH1D("hbkg","hbkg",60,-9.55,50.45)
+hcut = root.TH1D("hcut","hcut",60,-9.55,50.45)
 theTF1 = root.TF1("crystallball","[0]*ROOT::Math::crystalball_function(x, [1], [2], [3], [4])",-8,50)
-hbkgfraction = root.TH1F("hbkgfraction","hbkgfraction",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
-hjetn = root.TH1F("hjetn","hjetn;Number of jets;Events",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
+hbkgfraction = root.TH1D("hbkgfraction","hbkgfraction",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
+hjetn = root.TH1D("hjetn","hjetn;Number of jets;Events",opts.maxjet-opts.minjet+1,opts.minjet-0.5,opts.maxjet+0.5)
 
 def fitFcn(x, p):
             theTF1.SetParameters(p[0],p[1],p[2],p[3],p[4])

@@ -9,24 +9,28 @@ folder = os.getenv('SWUP_OUTPUTDIR')+"/../"
 years = ["2015_2016","2017","2018","2015_2018"]
 years = ["2015_2016","2017","2018"]
 thevars = {
-    "baseel_pt[0]": "",
-    "baseel_eta[0]": "",
-    "basemu_pt[0]":  "",
-    "basemu_eta[0]": "",
-    'mt': " -b '20,0,200' ",
-    'met':  " -b '20,0,200' ",
-    'dilep_m': "",
-    'n_jet': "",
-    'n_bjet': "",
+#    "baseel_pt[0]": "",
+#    "baseel_eta[0]": "",
+#    "basemu_pt[0]":  "",
+#    "basemu_eta[0]": "",
+#    'mt': " -b '20,0,200' ",
+#    'met':  " -b '20,0,200' ",
+#    'dilep_m': "",
+#    'n_jet': "",
+#    'n_bjet': "",
+    'n_jet*lep_charge[0]': " -b '31,-15.5,15.5' -n n_jet_times_lep_charge",
 #    'num_pv': "",
 #    'actual_int_per_xing': "",
 #    'av_int_per_xing': "",
 }
 cuts = {
-    '1Linclusive':('n_jet>=4 && jet_pt[1]>30e3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Single lepton"),
-    'el':('n_jet>=4 && jet_pt[1]>30e3 && baseel_pt[0] > Alt$(basemu_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Electron channel"),
-    'mu':('n_jet>=4 && jet_pt[1]>30e3 && basemu_pt[0] > Alt$(baseel_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Muon channel"),
-    '2LSS':       ('n_jet>=4 && jet_pt[1]>30e3','(lep_pt[0]>27e3 && lep_pt[1]>15e3 && (el_trigger || mu_trigger) && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(el_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "Same-sign leptons")
+    '1L0b':('n_jet>=4 && n_bjet==0','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Single lepton"),
+    'el0b':('n_jet>=4 && n_bjet==0 && baseel_pt[0] > Alt$(basemu_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Electron channel"),
+    'mu0b':('n_jet>=4 && n_bjet==0 && basemu_pt[0] > Alt$(baseel_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Muon channel"),
+#    '1Linclusive':('n_jet>=4','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Single lepton"),
+#    'el':('n_jet>=4 && baseel_pt[0] > Alt$(basemu_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Electron channel"),
+#    'mu':('n_jet>=4 && basemu_pt[0] > Alt$(baseel_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Muon channel"),
+#    '2LSS':       ('n_jet>=4','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(el_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "Same-sign leptons")
 }
 
 for year in years:

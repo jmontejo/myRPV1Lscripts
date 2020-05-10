@@ -40,3 +40,5 @@ plot.py -c rpv2l_4j20_shrink --no-overlay -o figures/data_mc/2015_2018/2LOS/ --c
 plot.py -c rpv2l_4j20_shrink --no-overlay -o figures/data_mc/2015_2018/2LOS_plus_baseline/ --cut '(lep_pt[1]>15e3 && n_jet>=4 && jet_pt[1]>30e3)*((n_lep==2 && (n_baseel+n_basemu)>=3 && lep_pt[0]>27e3 && lep_charge[0]!=lep_charge[1] && (el_trigger || mu_trigger) )*(sf_total*sf_mu_trigger*sf_el_trigger))' --sample-cut 'Fakes#0'  --label 'Dilepton plus baseline' -p ../Analysis/RPV1L/plotcfg/plotconfig_2015_2018_SS.py dilep_m
 
 plot-comp.py n_bjet -s /eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.114_a/rpv2l_4j20_shrink/wjets_mc16e/ -s /eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.114_a/rpv2l_4j20_shrink/wjets_madgraph_mc16e/ --cut '(n_jet>=4 && lep_pt[0]>27e3)' -n wjets_nbjet  --ratio-fixed-range "0.4,1.6" --log --title-per-sample "W+jets Sherpa" --title-per-sample "W+jets Madgraph" --ratio-title "Ratio to Sherpa" -o figures/WHF
+
+./yields-from-inputs.py
