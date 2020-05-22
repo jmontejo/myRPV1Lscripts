@@ -14,10 +14,10 @@ from SWup.ext.tabulate import tabulate, tabulate_formats
 with_error = False
 
 files = glob.glob(opts.folder+"/*root")
+print opts.folder,"has files: ", len(files)
 
 yields = {}
 for f in files:
-    if "higgsino" in f and not "300_1L20" in f: continue
     if "higgsino" in f and not "_higgsino" in f: continue
     if "stop" in f and not "stop_tbs_1075_600" in f: continue
     if "gluino" in f: continue
@@ -47,6 +47,8 @@ samples = [
     ("minor","Minor electroweak"),
     ("total","\hline Total background"),
     ("data","Data"),
+    ("C1N1_higgsino_500","Higgsino C1N1 (500 \\gev)"),
+    ("N1N2_higgsino_500","Higgsino N1N2 (500 \\gev)"),
     ("C1N1_higgsino_300_1L20","Higgsino C1N1 (300 \\gev)"),
     ("N1N2_higgsino_300_1L20","Higgsino N1N2 (300 \\gev)"),
     ("stop_tbs_1075_600","Stop (1075 \\gev) to higgsino (600 \\gev)"),
@@ -68,12 +70,13 @@ for jet in range(4,15+1):
         else:
             total = [(x+y, ex+ey) for (x,ex),(y,ey) in zip(total,jyields)]
     else:
+        if not total: continue
         jyields = total
     row1 = [samplelatex]
     if with_error:
         row1 += ["{0:.0f} +/- {1:.0f}".format(val,err) for b,(val,err) in enumerate(jyields) if b < 7]
     else:
-        row1 += ["{0:.0f}".format(max(0,val),err) for b,(val,err) in enumerate(jyields) if b < 7]
+        row1 += ["{0:.1f}".format(max(0,val),err) for b,(val,err) in enumerate(jyields) if b < 7]
     table1.append(row1)
     if sample=="qcd" or sample == "C1N1_higgsino_300_1L20": continue
     row2 = [samplelatex]
@@ -83,7 +86,9 @@ for jet in range(4,15+1):
         row2 += ["{0:.1f}".format(max(0,val),err) for b,(val,err) in enumerate(jyields) if b >= 7 and b<13]
     table2.append(row2)
 
-  with open(opts.tag+"yields_1L_%dj.tex"%jet,"w") as outfile:
+  outfolder = "tables/"+opts.tag
+  if not os.path.exists(outfolder): os.mkdir(outfolder)
+  with open(outfolder+"/yields_1L_%dj.tex"%jet,"w") as outfile:
     outfile.write( tabulate(table1,headers=["\\textbf{1-lepton, %d jets (20 \\gev)}"%jet]+headers1,tablefmt="latex_raw") )
-  with open(opts.tag+"yields_2L_%dj.tex"%jet,"w") as outfile:
+  with open(outfolder+"/yields_2L_%dj.tex"%jet,"w") as outfile:
     outfile.write( tabulate(table2,headers=["\\textbf{Same-sign leptons, %d jets (20 \\gev)}"%jet]+headers2,tablefmt="latex_raw") )
