@@ -21,7 +21,6 @@ def printNice(h,pt):
 campaign = ["mc16a","mc16d","mc16e","mc16"]
 campaign = ["mc16"]
 pts = [20,40,60,80,100]
-pts = [80,100]
 bcuts = {
 # "incl": 9,
  "0btag": 0,
@@ -45,7 +44,7 @@ systsB = [
 ]
 
 for c in campaign:
-    files = glob.glob("/eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.119_a/rpv2l_4j20_shrink/wjets_%s*/*root"%c)
+    files = glob.glob("/eos/atlas/atlaslocalgroupdisk/susy/jmontejo/ntupleProd_21.2.126_a/rpv2l_4j20_shrink/wjets_%s*/*root"%c)
     tree = ROOT.TChain()
     for f in files:
         treename = f.split("/")[-2]+"_Nom"

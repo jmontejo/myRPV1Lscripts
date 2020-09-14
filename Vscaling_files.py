@@ -7,7 +7,7 @@ import os
 ROOT.gROOT.SetBatch(1)
 ROOT.TH1.SetDefaultSumw2(1)
 
-default_production = "/eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.114_a/rpv2l_4j20_shrink/"
+default_production = "/eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.126_a/rpv2l_4j20_shrink/"
 parser = argparse.ArgumentParser()
 parser.add_argument("--production", default=default_production)
 parser.add_argument("--minjet", type=int, default=4)
@@ -23,11 +23,11 @@ opts = parser.parse_args()
 isData = "data" in opts.sample
 hists = {}
 cuts = { 
-#    (40,None): None,
-#    (60,None): None,
-#    (80,None): None,
-    (20,'2j30'):  'jet_pt[1]>30e3', 
-#    (20,'2j25'):  'jet_pt[1]>25e3', 
+    (20,None): None,
+    (40,None): None,
+    (60,None): None,
+    (80,None): None,
+    (100,None): None,
 }
 
 

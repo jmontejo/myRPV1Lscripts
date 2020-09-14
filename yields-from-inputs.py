@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import argparse
-default_folder = "/afs/cern.ch/work/a/atlrpv1l/outputs/input_for_fit_21.2.119_a/pt20.0_minjet4_btag/"
+default_folder = "/afs/cern.ch/work/a/atlrpv1l/outputs/input_for_fit_21.2.119_a_shapefix/pt20.0_minjet3_btag/"
 parser = argparse.ArgumentParser()
 parser.add_argument("--folder",default=default_folder)
 parser.add_argument("--tag",default="")
@@ -23,11 +23,14 @@ for f in files:
     if "gluino" in f: continue
     if "incl" in f and not "15jincl" in f: continue
     if "excl" in f and "15jexcl" in f: continue
+    if not "__" in f: continue
     name, rest = os.path.basename(f).split("__")
+    if "shape" in rest: continue
     name = name.replace("_mc","")
     jet = int(rest[5:rest.find("j")])
     rfile = ROOT.TFile.Open(f)
     h = rfile.Get(name)
+    if not h: h = rfile.Get(name+"_higgsino")
     if not name in yields: yields[name] = {}
     print f, name, jet
     yields[name][jet] = [(h.GetBinContent(b), h.GetBinError(b)) for b in range(1,h.GetNbinsX()+1)]
@@ -52,6 +55,10 @@ samples = [
     ("C1N1_higgsino_300_1L20","Higgsino C1N1 (300 \\gev)"),
     ("N1N2_higgsino_300_1L20","Higgsino N1N2 (300 \\gev)"),
     ("stop_tbs_1075_600","Stop (1075 \\gev) to higgsino (600 \\gev)"),
+#    ("ttV_sherpa","\\ttbar V"),
+#    ("ttW_sherpa","\\ttbar W"),
+#    ("ttll_sherpa","\\ttbar ll"),
+#    ("ttZhad_sherpa","\\ttbar Z (qq,vv)"),
 ]
 
 for jet in range(4,15+1):
