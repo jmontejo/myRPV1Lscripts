@@ -20,6 +20,8 @@ parser.add_argument("--outsample", help="Sample name in the output file")
 parser.add_argument("--sample-cut", help="Cut specific to this sample") 
 opts = parser.parse_args()
 
+ROOT.gROOT.LoadMacro("../SWup/share/calc_mlj_pair.C+")
+
 isData = "data" in opts.sample
 hists = {}
 cuts = { 
@@ -36,7 +38,7 @@ if not isData:
     files = glob.glob(opts.production+"/%s_%s*/*%s*root"% (opts.sample, mc16part,opts.filter_sample))
 else:
     mc16part = "data15" if opts.onlyMC16a or opts.quick_test else "data"
-    files = glob.glob(opts.production+"/data/%s*%s*root"% (opts.sample, mc16part,opts.filter_sample))
+    files = glob.glob(opts.production+"/data/%s*%s*root"% (mc16part,opts.filter_sample))
 tree = ROOT.TChain()
 for f in files:
     treename = f.split("/")[-2]

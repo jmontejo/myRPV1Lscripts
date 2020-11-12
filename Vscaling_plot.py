@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
-default_pts = ["20_2j30","40","60","80"]
-default_add_syst = 0.002
+default_pts = ["20","40","60","80","100"]
+default_add_syst = 0.005
 parser = argparse.ArgumentParser()
 parser.add_argument("--minjet", type=int, default=4)
 parser.add_argument("--maxjet", type=int, default=15)
@@ -12,6 +12,7 @@ parser.add_argument("--pt", action="append", help="pT thresholds to plot")
 parser.add_argument("--onlyMC16a", action="store_true")
 parser.add_argument("--ploterrorband", action="store_true")
 parser.add_argument("--print-syst", action="store_true")
+parser.add_argument("--tag", help="Add some descriptive tag for tests")
 opts = parser.parse_args()
 if not opts.pt: opts.pt = default_pts
 
@@ -49,9 +50,9 @@ samples = {
 
     "multibosonsMC"      :("MC VV+jets",24,1, 0, None),
 
-    "Wt1LMC"             :("MC Wt",32,3, 0, None),
-    "WtttbarMC"          :("MC ttbar+Wt",32,3, 0, ("Wt1LMC","ttbar1LMC","ttbar2LMC")), #dont rename, matches ttW
-    "WtMCcommon"         :("MC Wt common fit",32,3, 0, ("Wt1LMC",)),
+    "WtMC"             :("MC Wt",32,3, 0, None),
+    "WtttbarMC"          :("MC ttbar+Wt",32,3, 0, ("WtMC","ttbar1LMC","ttbar2LMC")), #dont rename, matches ttW
+    "WtMCcommon"         :("MC Wt common fit",32,3, 0, ("WtMC",)),
     "ttbarMCcommon"      :("MC ttbar common fit",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
 
     "ttbarMC"            :("MC ttbar",32,3, 0, ("ttbar1LMC","ttbar2LMC")),
@@ -60,26 +61,34 @@ samples = {
     "ttbar_amcatnlo"     :("MC ttbar (ME)",30,3, 0, None),
     "ttbar_herwig"       :("MC ttbar (PS)",46,3, 0, None),
 
-    "emubjetData"        :("Data emu+bjet",21,3, 2, None),
+    "emubData"        :("Data emu+bjet",21,3, 2, None),
     "ttbar2LemubMC"      :("MC ttbar (2L) emu+bjet",25,3, 2, None),
     "ttbar2LemuMC"       :("MC ttbar (2L) emu",36,3, 2, None),
 
-    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",46,3, 0, ("ttWMC","ttbar2LSSMC")),
-    "ttWMC"              :("MC ttW",28,3, 0, None),
     "ttbar2LSSMC"        :("MC t#bar{t} fakes",30,3, 0, None),
+    "ttWMC"              :("MC ttW",28,3, 0, None),
+    "ttWplusttbar2LSSMC" :("MC ttW+t#bar{t} fakes",46,3, 0, ("ttWMC","ttbar2LSSMC")),
+    "ttbar2LSSMCmlj155"        :("MC t#bar{t} fakes",30,3, 0, None),
+    "ttWMCmlj155"              :("MC ttW",28,3, 0, None),
+    "ttWplusttbar2LSSMCmlj155" :("MC ttW+t#bar{t} fakes",46,3, 0, ("ttWMCmlj155","ttbar2LSSMCmlj155")),
+    #"ttbar2LSSMCmlj155"        :("MC (mlj<155) t#bar{t} fakes",30,3, 0, None),
+    #"ttWMCmlj155"              :("MC (mlj<155) ttW",28,3, 0, None),
+    #"ttWplusttbar2LSSMCmlj155" :("MC (mlj<155) ttW+t#bar{t} fakes",46,3, 0, ("ttWMCmlj155","ttbar2LSSMCmlj155")),
     "dummy"              :("Dummy",32,3, 0, None),
     }
 
 groups = {
     "gammajets" : ("gammajets","dummy","dummy","dummy"),
     "Vjets"     : ("wjetsMC","zjetsMC","wjets_madgraph","gammajets"),
-    "ttbar"     : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubjetData"),
-    "ttbar2L"   : ("ttbar2LemuMC","ttbar2LemubMC","emubjetData","dummy"),
+    "ttbar"     : ("ttbar1LMC","ttbar2LemuMC","ttbar2LemubMC","emubData"),
+    "ttbar2L"   : ("ttbar2LemuMC","ttbar2LemubMC","emubData","dummy"),
     "ttbar1L"   : ("ttbar1LMC","ttbarMC","WtttbarMC","dummy"),
     "ttbarsyst" : ("ttbarMC","ttbar_amcatnlo","ttbar_herwig","dummy"),
     "SS3L"      : ("multibosonsMC","ttWMC","ttbar2LSSMC","ttWplusttbar2LSSMC"),
-    "Wtcommon"  : ("WtttbarMC","Wt1LMC","ttbarMCcommon","WtMCcommon"),
-    "Wt"        : ("Wt1LMC","ttbarMC","WtttbarMC","dummy")
+    "SS3Lmlj155": ("multibosonsMC","ttWMCmlj155","ttbar2LSSMCmlj155","ttWplusttbar2LSSMCmlj155"),
+    "SS3Lmlj155comp": ("ttWplusttbar2LSSMC","ttWplusttbar2LSSMCmlj155"),
+    "Wtcommon"  : ("WtttbarMC","WtMC","ttbarMCcommon","WtMCcommon"),
+    "Wt"        : ("WtMC","ttbarMC","WtttbarMC","dummy")
     }
 
 if opts.sample_group:
@@ -101,6 +110,7 @@ if opts.sample:
     tag += "_sample"
 if loglikelihoodfit:
     tag += "_llp"
+if opts.tag: tag += "_"+opts.tag
 
 offset = opts.maxjet-opts.minjet+1
 holder = []
@@ -122,16 +132,19 @@ def getSampleHisto(samplename,pt,opts):
         if "Data" in sub:
             mc16part = "data15" if opts.onlyMC16a else "data"
         histoname = "njet_%s_%s_%s"%(sub,mc16part,pt)
+
+        if any([x in histoname for x in  ("ttWMCmlj155","ttbar2LSSMCmlj155","ttWplusttbar2LSSMCmlj155")]) and not "_20" in histoname:
+            histoname = histoname.replace("mlj155","")
         if histoname == "njet_Wt1LMC_mc16_20_2j30":
             histoname = histoname.replace("Wt1LMC","WtMC")
-        if "gammajets" in sub:
-            histoname = "njet_%s_%s"%(sub,pt)
+        if "gammajets" in sub or "emubData" in sub:
+            histoname = "njet_%s_data_%s"%(sub,pt)
         if not h:
             tmp = samplefile.Get(histoname)
             if tmp:
                 h = tmp.Clone(samplename)
         else:
-            if sub == "ttbar2LMC": #shift by two jets
+            if sub == "ttbar2LMC" or sub == "ttbar2LemuMC" or sub == "ttbar2LemubMC": #shift by two jets
                 tmp1L = h.Clone()
                 tmp2L = samplefile.Get(histoname)
                 for ib in range(tmp1L.GetNbinsX()):
@@ -140,6 +153,8 @@ def getSampleHisto(samplename,pt,opts):
                 h.Add( tmp1L , subweight)
             else:
                 h.Add( samplefile.Get(histoname) , subweight)
+    if "gammajets" in samplename or "emubData" in samplename:
+        h.Scale(1./139100)
     return h
 
 def main(m):
@@ -184,8 +199,8 @@ def main(m):
             h.SetMinimum(0.02)
             h.SetMaximum(1e8)
             m.dummy.cd()
-            m.fitfcn.SetParLimits(1,0,3)
-            m.fitfcn.SetParLimits(2,0,3)
+            m.fitfcn.SetParLimits(1,4e-2,3)
+            m.fitfcn.SetParLimits(2,4e-2,6)
             loglikelihoodfit=False
             if "tt" in samplename or "Wt" in samplename or "emu" in samplename:
                 m.fitfcn.ReleaseParameter(3)
@@ -206,7 +221,7 @@ def main(m):
                     m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.17, 0.6, -1.1, h.GetBinContent(h.GetMaximumBin()))
             else:
                 m.fitfcn.SetParameters(h.GetBinContent(h.GetMaximumBin()), 0.1, 1.0, 1, h.GetBinContent(h.GetMaximumBin()))
-                m.fitfcn.FixParameter(3,1)
+                #m.fitfcn.FixParameter(3,1)
                 if "wjets" in samplename or "zjets" in samplename:
                     m.fitfcn.ReleaseParameter(4)
                 else:
@@ -239,10 +254,11 @@ def main(m):
             if opts.ploterrorband:
                 fitband.DrawCopy("e5 same")
             if opts.sample:
-                if ipt==3: m.bottompad1.cd()
-                if ipt==2: m.bottompad2.cd()
-                if ipt==1: m.bottompad3.cd()
-                if ipt==0: m.bottompad4.cd()
+                if ipt==4: m.bottompad1.cd()
+                if ipt==3: m.bottompad2.cd()
+                if ipt==2: m.bottompad3.cd()
+                if ipt==1: m.bottompad4.cd()
+                if ipt==0: m.bottompad5.cd()
             else:
                 if isample==3: m.bottompad1.cd()
                 if isample==2: m.bottompad2.cd()
@@ -252,7 +268,7 @@ def main(m):
     
             ratio = h.Clone()
             ratio.Divide(f)
-            ratio.GetYaxis().SetRangeUser(0.4,1.6)
+            ratio.GetYaxis().SetRangeUser(0.3,1.7)
             ratio.GetXaxis().SetTitleOffset(5)
             shortname = legendname.replace("Data ","").replace("MC ","")
             ratio.GetYaxis().SetTitle(shortname+" / Fit"+" "*ratiospace)
@@ -344,7 +360,10 @@ def main(m):
             if fitres.Status()!=0 and forinternal:
                 m.fittext.DrawLatexNDC(0.5,0.8-0.1*ipt,"#color[%d]{Failed fit}"%(ipt+coloroffset+1*(ipt>=3)))
             if firstsample:
-                m.legendpt.AddEntry(h,"jet p_{T} > %s GeV" % pt.split("_")[0],"l")
+                legtitle = "jet p_{T} > %s GeV" % pt.split("_")[0]
+                if any(["mlj155" in x for x in group]) and "20" in pt:
+                    legtitle += " (m_{lj} < 155 GeV)"
+                m.legendpt.AddEntry(h,legtitle,"l")
                 print "AddEntry",pt
             firstpt = False
             usedsample = True
@@ -382,7 +401,7 @@ class M(object):
     self.ratiofcn = ROOT.TF1("ratiofcn","[0] + [1]/(x+[2])",opts.minjet-0.5-2,opts.maxjet+0.5)
     self.lines = []
     
-    activepanels = 4 if opts.sample else 4- group.count("dummy")
+    activepanels = 5 if opts.sample else 4- group.count("dummy")
 
     self.dummy = ROOT.TCanvas("dummy","dummy", 800, 800 )
     self.intcanvas = ROOT.TCanvas("jetn","jetn", 800, 1000 )
@@ -402,6 +421,13 @@ class M(object):
         self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.  , 1., 0., 0, 0, 0) 
         self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.  , 1., 0., 0, 0, 0) 
         self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.00, 1., 0.25, 0, 0, 0) 
+    elif activepanels == 5:
+        self.toppad     = ROOT.TPad("toppad",     "toppad  ",   0.0, 0.50, 1., 1., 0, 0, 0 )
+        self.bottompad1 = ROOT.TPad("bottompad1", "bottompad1", 0.0, 0.  , 1., 0.14, 0, 0, 0) 
+        self.bottompad2 = ROOT.TPad("bottompad2", "bottompad2", 0.0, 0.14, 1., 0.23, 0, 0, 0) 
+        self.bottompad3 = ROOT.TPad("bottompad3", "bottompad3", 0.0, 0.23, 1., 0.32, 0, 0, 0) 
+        self.bottompad4 = ROOT.TPad("bottompad4", "bottompad4", 0.0, 0.32, 1., 0.41, 0, 0, 0) 
+        self.bottompad5 = ROOT.TPad("bottompad5", "bottompad5", 0.0, 0.41, 1., 0.50, 0, 0, 0) 
 
     self.intcanvas.cd()
     self.toppad.Draw()
@@ -436,6 +462,13 @@ class M(object):
     self.bottompad4.SetLeftMargin(0.20)
     self.bottompad4.SetTopMargin(0.)
     self.bottompad4.SetBottomMargin(0.0)
+    if activepanels == 5:
+        self.intcanvas.cd()
+        self.bottompad5.Draw()
+        self.bottompad5.cd()
+        self.bottompad5.SetLeftMargin(0.20)
+        self.bottompad5.SetTopMargin(0.)
+        self.bottompad5.SetBottomMargin(0.0)
     if activepanels == 1:
         self.bottompad4.SetBottomMargin(0.3333)
     self.intcanvas.cd()

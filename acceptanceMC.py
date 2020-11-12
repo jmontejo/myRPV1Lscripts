@@ -50,7 +50,7 @@ def printDict(corrs,L,k,x0,btagger,pt,cut):
         print "WARNING correlation factor smaller than one, setting to 1:",corr
         if corr<0.9:
             print "ERROR correlation factor way smaller than one, intervene:",corr
-            sys.exit(1)
+            #sys.exit(1)
         corr = "1., #%f"%corr
     block = """
     _fixedvalues['{btag}_{pt}']={{
@@ -151,7 +151,7 @@ for pack,samples in packs.iteritems():
             if "ttX" in sample and "ttbar" in f: treename = treename.replace("ttX_merged","ttbar")
             if "ttX" in sample and not "ttbar" in f: treename = treename.replace("ttX_merged","ttV_sherpa")
             if opts.fast:
-                tree.AddFile(f,10000,treename)
+                tree.AddFile(f,100000,treename)
             else:
                 tree.AddFile(f,ROOT.TTree.kMaxEntries,treename)
         if not tree.GetEntries():
