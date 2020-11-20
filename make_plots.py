@@ -9,11 +9,11 @@ folder = os.getenv('SWUP_OUTPUTDIR')+"/../"
 
 years = ["2015_2016","2017","2018","2015_2018"]
 years = ["2015_2016","2017","2018"]
-years = ["2015_2016"]
 years = ["2015_2018"]
+years = ["2015_2016"]
 thevars = {
 #    'n_jet': "",
-#    'n_bjet': "",
+    'n_bjet': "",
 #    'mt': " -b '20,0,200' ",
 #    'met':  " -b '20,0,200' ",
 #    "lep_pt[0]": "",
@@ -22,6 +22,7 @@ thevars = {
 #    "lep_eta[1]": "",
 #    "Max$(abs(lep_eta))": " -b '20,-2.5,2.5' ",
 #    'dilep_m[0]': " -b '20,0,200'", #low mass
+#    '(dilep_m[0]<101e3 && dilep_m[0]>81e3)*5 + n_lep': " -b '10,0.5,10.5' -n dilep_plus_nlep",
 #    "basemu_pt[0]":  "",
 #    "basemu_eta[0]": "",
 #    "mu_phi[0]":  " -b '6400,-3.2,3.2'",
@@ -81,14 +82,15 @@ thevars = {
 #    "calc_mlj_pair(lep_pt[0],lep_eta[0],lep_phi[0],lep_e[0],lep_pt[1],lep_eta[1],lep_phi[1],lep_e[1],jet_pt[0],jet_eta[0],jet_phi[0],jet_e[0],jet_pt[1],jet_eta[1],jet_phi[1],jet_e[1],jet_pt[2],jet_eta[2],jet_phi[2],jet_e[2],jet_pt[3],jet_eta[3],jet_phi[3],jet_e[3])" : " -b '20,0,200e3' -n minmax_mlj_short_upto4j",
 #    "calc_mlj_pair(lep_pt[0],lep_eta[0],lep_phi[0],lep_e[0],lep_pt[1],lep_eta[1],lep_phi[1],lep_e[1],jet_pt[0],jet_eta[0],jet_phi[0],jet_e[0],jet_pt[1],jet_eta[1],jet_phi[1],jet_e[1],jet_pt[2],jet_eta[2],jet_phi[2],jet_e[2],jet_pt[3],jet_eta[3],jet_phi[3],jet_e[3],Alt$(jet_pt[4],0),Alt$(jet_eta[4],0),Alt$(jet_phi[4],0),Alt$(jet_e[4],0))" : " -b '20,0,200e3' -n minmax_mlj_short_upto5j",
 #    "calc_mlj_pair(lep_pt[0],lep_eta[0],lep_phi[0],lep_e[0],lep_pt[1],lep_eta[1],lep_phi[1],lep_e[1],jet_pt[0],jet_eta[0],jet_phi[0],jet_e[0],jet_pt[1],jet_eta[1],jet_phi[1],jet_e[1],jet_pt[2],jet_eta[2],jet_phi[2],jet_e[2],jet_pt[3],jet_eta[3],jet_phi[3],jet_e[3],Alt$(jet_pt[4],0),Alt$(jet_eta[4],0),Alt$(jet_phi[4],0),Alt$(jet_e[4],0),Alt$(jet_pt[5],0),Alt$(jet_eta[5],0),Alt$(jet_phi[5],0),  Alt$(jet_e[5],0))" : " -b '20,0,200e3' -n minmax_mlj_short_upto6j",
-    "calc_mlj_pair(lep_pt[0],lep_eta[0],lep_phi[0],lep_e[0],lep_pt[1],lep_eta[1],lep_phi[1],lep_e[1],MinIf$(jet_pt[0],jet_bjet[0]),MinIf$(jet_eta[0],jet_bjet[0]),MinIf$(jet_phi[0],jet_bjet[0]),MinIf$(jet_e[0],jet_bjet[0]),MinIf$(jet_pt[1],jet_bjet[1]),MinIf$(jet_eta[1],jet_bjet[1]),MinIf$(jet_phi[1],jet_bjet[1]),MinIf$(jet_e[1],jet_bjet[1]),MinIf$(jet_pt[2],jet_bjet[2]),MinIf$(jet_eta[2],jet_bjet[2]),MinIf$(jet_phi[2],jet_bjet[2]),MinIf$(jet_e[2],jet_bjet[2]),MinIf$(jet_pt[3],jet_bjet[3]),MinIf$(jet_eta[3],jet_bjet[3]),MinIf$(jet_phi[3],jet_bjet[3]),MinIf$(jet_e[3],jet_bjet[3]),MinIf$(jet_pt[4],jet_bjet[4]),MinIf$(jet_eta[4],jet_bjet[4]),MinIf$(jet_phi[4],jet_bjet[4]),MinIf$(jet_e[4],jet_bjet[4]),MinIf$(jet_pt[5],jet_bjet[5]),MinIf$(jet_eta[5],jet_bjet[5]),MinIf$(jet_phi[5],jet_bjet[5]),  MinIf$(jet_e[5],jet_bjet[5]))" : " -b '20,0,300e3' -n minmax_mlb",
+#    "calc_mlj_pair(lep_pt[0],lep_eta[0],lep_phi[0],lep_e[0],lep_pt[1],lep_eta[1],lep_phi[1],lep_e[1],MinIf$(jet_pt[0],jet_bjet[0]),MinIf$(jet_eta[0],jet_bjet[0]),MinIf$(jet_phi[0],jet_bjet[0]),MinIf$(jet_e[0],jet_bjet[0]),MinIf$(jet_pt[1],jet_bjet[1]),MinIf$(jet_eta[1],jet_bjet[1]),MinIf$(jet_phi[1],jet_bjet[1]),MinIf$(jet_e[1],jet_bjet[1]),MinIf$(jet_pt[2],jet_bjet[2]),MinIf$(jet_eta[2],jet_bjet[2]),MinIf$(jet_phi[2],jet_bjet[2]),MinIf$(jet_e[2],jet_bjet[2]),MinIf$(jet_pt[3],jet_bjet[3]),MinIf$(jet_eta[3],jet_bjet[3]),MinIf$(jet_phi[3],jet_bjet[3]),MinIf$(jet_e[3],jet_bjet[3]),MinIf$(jet_pt[4],jet_bjet[4]),MinIf$(jet_eta[4],jet_bjet[4]),MinIf$(jet_phi[4],jet_bjet[4]),MinIf$(jet_e[4],jet_bjet[4]),MinIf$(jet_pt[5],jet_bjet[5]),MinIf$(jet_eta[5],jet_bjet[5]),MinIf$(jet_phi[5],jet_bjet[5]),  MinIf$(jet_e[5],jet_bjet[5]))" : " -b '20,0,300e3' -n minmax_mlb",
 }
 cuts = {
+    'ZZ':('n_jet>=4','(lep_pt[0]>27e3 && n_el>=1 && n_mu>=1 && n_baseel>=2 && n_basemu>=2 && (dilep_m[0]<101e3 && dilep_m[0]>81e3) && n_lep>=3 && (el_trigger || mu_trigger) && lep_trigger_matched )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Single lepton"),
 #    '1Linclusive':('n_jet>=4','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched )*(sf_total*sf_mu_trigger*sf_el_trigger)',"Single lepton"),
 #    'el':('n_jet>=4 && (!lep_is_muon[0])','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched)*(sf_total*sf_mu_trigger*sf_el_trigger)',"Electron channel"),
 #    'mu':('n_jet>=4 && lep_is_muon[0]   ','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched)*(sf_total*sf_mu_trigger*sf_el_trigger)',"Muon channel"),
 #    '2LSS':       ('n_jet>=4','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "Same-sign leptons"),
-    '2LSS3b':     ('n_jet>=4 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
+#    '2LSS3b':     ('n_jet>=4 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
 #    '2LSS3b4j':     ('n_jet>=4 && n_jet==4 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
 #    '2LSS3b5j':     ('n_jet>=4 && n_jet==5 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
 #    '2LSS3b6j':     ('n_jet>=4 && n_jet==6 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
@@ -96,7 +98,7 @@ cuts = {
 #    '2LSS3bleq6jhighpte':     ('lep_pt[0]>50e3 && !lep_is_muon[0] && n_jet>=4 && n_jet<=6 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b"),
 #    '2LSS5j3b':     ('n_jet>=5 && n_bjet>=3','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 5j3b"),
 
-    '2LSS1b':       ('n_jet>=4 && n_bjet>=1','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j1b"),
+#    '2LSS1b':       ('n_jet>=4 && n_bjet>=1','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j1b"),
 #    '2LSS2b_el':       ('n_jet>=4 && n_bjet==2 && baseel_pt[0] > Alt$(basemu_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j2b electron"),
 #    '2LSS2b_mu':       ('n_jet>=4 && n_bjet==2  && basemu_pt[0] > Alt$(baseel_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j2b muon"),
 #    '2LSS3b_el':       ('n_jet>=4 && n_bjet>=3 && baseel_pt[0] > Alt$(basemu_pt[0],0)','(lep_pt[0]>27e3 && (el_trigger || mu_trigger) && lep_trigger_matched && (n_baseel+n_basemu)==2 && n_lep==2 && lep_charge[0]*lep_charge[1]>0 && Sum$(lep_passECIDS==0)==0 && (n_el!=2 || Alt$(dilep_m[0],0)<81e3 || Alt$(dilep_m[0],0)>101e3))*(sf_total * sf_el_trigger * sf_mu_trigger*sf_el_ECIDS )', "SS 4j3b electron"),
@@ -121,7 +123,6 @@ cuts = {
 for year in years:
   for cutname, (bothcut, rawcut, label) in cuts.iteritems():
     tag = ""
-    if "2Lemu" in cutname: tag = "_SS"
     if "2LSS" in cutname: tag = "_SS"
     if "3L" in cutname: tag = "_3L"
     configFile = '../Analysis/RPV1L/plotcfg/plotconfig_%s%s.py' % (year,tag)
@@ -130,6 +131,7 @@ for year in years:
     if "2LSS3b" in cutname: opts += " --ratio2"
     if "3L" in cutname: opts += " --no-overlay"
     if "2Lemu" in cutname: opts += " --no-overlay"
+    if "ZZ" in cutname: opts += " --no-overlay"
     cut = "(%s)*(%s)"%(bothcut,rawcut)
 
     for varname, varextra in thevars.iteritems():

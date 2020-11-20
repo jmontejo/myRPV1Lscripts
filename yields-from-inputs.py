@@ -4,7 +4,9 @@ default_folder = "/afs/cern.ch/work/a/atlrpv1l/outputs/input_for_fit_21.2.119_a_
 parser = argparse.ArgumentParser()
 parser.add_argument("--folder",default=default_folder)
 parser.add_argument("--tag",default="")
+parser.add_argument("--include-2Lplusb",action="store_true")
 opts = parser.parse_args()
+offset = int(opts.include_2Lplusb)
 
 import ROOT
 import glob, os
@@ -88,9 +90,9 @@ for jet in range(4,15+1):
     if sample=="qcd" or sample == "C1N1_higgsino_300_1L20": continue
     row2 = [samplelatex]
     if with_error:
-        row2 += ["{0:.1f} +/- {1:.1f}".format(val,err) for b,(val,err) in enumerate(jyields) if b >= 7 and b<13]
+        row2 += ["{0:.1f} +/- {1:.1f}".format(val,err) for b,(val,err) in enumerate(jyields) if b >= 7 and b<13+offset]
     else:
-        row2 += ["{0:.1f}".format(max(0,val),err) for b,(val,err) in enumerate(jyields) if b >= 7 and b<13]
+        row2 += ["{0:.1f}".format(max(0,val),err) for b,(val,err) in enumerate(jyields) if b >= 7 and b<13+offset]
     table2.append(row2)
 
   outfolder = "tables/"+opts.tag

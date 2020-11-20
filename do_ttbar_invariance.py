@@ -100,8 +100,8 @@ def comparison_plot(njet, nbjetmax, sample, cutname, varname, nbins, sample2=Non
     else:
         folder="/eos/atlas/atlaslocalgroupdisk/susy/jmontejo/ntupleProd_21.2.126_a/rpv2l_4j20_shrink/"
     cut = cuts[cutname]
-    var = variables[varname] if varname in variables else varname
     var = var.replace("NJET",str(abs(njet)))
+    var = variables[varname] if varname in variables else varname
     ratio = "--ratio-fixed-range  '0.5,1.5' "
     exactly4=int(exactly4)
 
