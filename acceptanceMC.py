@@ -100,8 +100,6 @@ packs = {
 }
 def nicename(name):
     name = name.replace("mc15a_","").replace("_ttbar","").replace("_ht","")
-    name = name.replace("systME","aMC@NLO+Py8")
-    name = name.replace("systPS","Powheg+Hpp")
     name = name.replace("powhegpy6","Powheg+Py6")
     name = name.replace("powhegpy8","Powheg+Py8")
     name = name.replace("sherpa","Sherpa")
@@ -118,10 +116,10 @@ def nicename(name):
         name = bname + ' ' + wname
     if "_allowmistag" in name:
         name = name.replace("_allowmistag"," include mistags")
-    if "ttbar_amcatnlo" in name:
-        name = name.replace("_amcatnlo"," aMcAtNlo+Pythia")
-    elif "ttbar_herwig" in name:
-        name = name.replace("_amcatnlo"," Powheg+Herwig")
+    if "systME" in name:
+        name = name.replace("systME","aMC@NLO+Py8")
+    elif "systPS" in name:
+        name = name.replace("systPS","Powheg+Hpp")
     else:
         name = name.replace("ttbar","ttbar Powheg+Pythia")
     return name
@@ -144,7 +142,7 @@ for pack,samples in packs.iteritems():
         samplefolder = samplefolder.replace("_amcatnlo","AF2").replace("_herwig","AF2")
         if "weight" in samplefolder:
             samplefolder = samplefolder[:samplefolder.find("_weight")] 
-        files = glob.glob("/eos/user/a/atlrpv1l/rpv1l/output/export/ntupleProd_21.2.126_a/rpv2l_4j20_shrink/%s_mc16*/mc16_*%s*.root" % (samplefolder,    samplepattern))
+        files = glob.glob("/eos/atlas/atlaslocalgroupdisk/susy/jmontejo/ntupleProd_21.2.126_a/rpv2l_4j20_shrink/%s_mc16*/mc16_*%s*.root" % (samplefolder,    samplepattern))
         for f in files:
             print f
             treename = f.split("/")[-2]+"_Nom"
@@ -249,7 +247,7 @@ for pack,samples in packs.iteritems():
                 hcorrel.SetBinError(j+1,Cbacc_err)
                 haccnils.SetBinContent(j+1,accnils)
                 haccnils.SetBinError(j+1,accnils_err)
-            if True or (sample=="ttbar_nohf" and not "2LSS" in opts.cutname) or sample=="ttX_merged_nohf": #FIXME
+            if (sample=="ttbar_nohf" and not "2LSS" in opts.cutname) or sample=="ttX_merged_nohf":
                 haccnils.Fit("myf")
                 printDict(correlations,myf.GetParameter(0),myf.GetParameter(1),myf.GetParameter(2),opts.btagger,jetpt,opts.cutname)
                 hcharmfraction.Fit("myf")

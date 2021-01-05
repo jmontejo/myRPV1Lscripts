@@ -13,6 +13,7 @@ parser.add_argument("--onlyMC16a", action="store_true")
 parser.add_argument("--ploterrorband", action="store_true")
 parser.add_argument("--print-syst", action="store_true")
 parser.add_argument("--tag", help="Add some descriptive tag for tests")
+parser.add_argument("--fix-c2", type=float, help="Fix c2 to some constant value")
 opts = parser.parse_args()
 if not opts.pt: opts.pt = default_pts
 
@@ -153,7 +154,7 @@ def getSampleHisto(samplename,pt,opts):
                 h.Add( tmp1L , subweight)
             else:
                 h.Add( samplefile.Get(histoname) , subweight)
-    if "gammajets" in samplename or "emubData" in samplename:
+    if "emubData" in samplename:
         h.Scale(1./139100)
     return h
 
@@ -226,6 +227,8 @@ def main(m):
                     m.fitfcn.ReleaseParameter(4)
                 else:
                     m.fitfcn.FixParameter(4,0)
+            if opts.fix_c2:
+                m.fitfcn.FixParameter(3,opts.fix_c2)
             if "ttbar2LSSMC" in samplename or "ttWMC" in samplename  or ("madgraph" in samplename and "80" in pt):
                 loglikelihoodfit=True
             if loglikelihoodfit:

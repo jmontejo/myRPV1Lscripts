@@ -33,7 +33,7 @@ systsC = {
     "fourtop"    : [("fourtop_syst","Herwig 7")],
 }
 
-samples = ["multibosons","ttV_sherpa","minor","fourtop"]
+samples = ["multibosons","ttV_sherpa","minor","fourtop","singletop"]
 maxjet = 15
 minjet = 4
 
@@ -86,7 +86,7 @@ def main():
             else:
                 njet = njet.format(pt)
             cut = '(weight*xs_weight)*((el_trigger || mu_trigger) && lep_trigger_matched)*(sf_total * sf_el_trigger * sf_mu_trigger )'
-            print "Will draw",pt
+            print "Will draw nominal",pt, sample
             tree.Draw("%s >> %s"%(njet,hname),cut,'goff')
             h1d.SetLineWidth(2)
             h1d.SetLineColor(i+1)
